@@ -26,10 +26,8 @@ import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
-import org.aopalliance.aop.Advice;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-import org.springframework.aop.Advisor;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
 import org.springframework.beans.BeanUtils;
@@ -63,8 +61,6 @@ import org.springframework.transaction.interceptor.TransactionalProxy;
 import org.springframework.util.Assert;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.ConcurrentReferenceHashMap.ReferenceType;
-
-import com.github.arielcarrera.cdi.support.transactional.MyTransactionInterceptor;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -319,20 +315,7 @@ public abstract class RepositoryFactorySupport implements BeanClassLoaderAware, 
 
 		result.addAdvice(SurroundingTransactionDetectorMethodInterceptor.INSTANCE);
 		result.addAdvisor(ExposeInvocationInterceptor.ADVISOR);
-		//CHANGE
-		result.addAdvisor(new Advisor() {
-			
-			@Override
-			public boolean isPerInstance() {
-				return false;
-			}
-			
-			@Override
-			public Advice getAdvice() {
-				return new MyTransactionInterceptor();
-			}
-		});//add Transactional Advisor
-		//END CHANGE
+
 		postProcessors.forEach(processor -> processor.postProcess(result, information));
 
 		result.addAdvice(new DefaultMethodInvokingMethodInterceptor());
