@@ -1,6 +1,4 @@
-package com.github.arielcarrera.cdi.repositories;
-
-import java.io.Serializable;
+package com.github.arielcarrera.cdi.repositories.helpers;
 
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -13,13 +11,17 @@ import javax.persistence.EntityManager;
  * @param <T> Type of the entity
  * @param <ID> Entity's PK
  */
-public class JpaRepositoryHelperImpl<T, ID extends Serializable> {
+public class CustomJpaRepositoryImpl implements CustomJpaRepository {
 
 	@Inject
 	EntityManager entityManager;
 	
-	EntityManager getEntityManager() {
+	public EntityManager entityManager() {
 		return entityManager;
+	}
+
+	public CustomJpaRepositoryImpl() {
+		super();
 	}
 	
 }

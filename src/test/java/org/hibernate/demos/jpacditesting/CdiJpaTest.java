@@ -25,8 +25,8 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import com.github.arielcarrera.cdi.test.entities.TestEntity;
-import com.github.arielcarrera.cdi.test.repositories.TestReadableRepository;
-import com.github.arielcarrera.cdi.test.repositories.TestWritableRepository;
+import com.github.arielcarrera.cdi.test.repositories.TestReadOnlyRepository;
+import com.github.arielcarrera.cdi.test.repositories.TestReadWriteRepository;
 
 public class CdiJpaTest {
 
@@ -44,10 +44,10 @@ public class CdiJpaTest {
 //    private UserTransaction ut;
 
 	@Inject
-	private TestWritableRepository writableRepository;
+	private TestReadWriteRepository writableRepository;
 
 	@Inject
-	private TestReadableRepository readableRepository;
+	private TestReadOnlyRepository readableRepository;
 
 
 	@Test

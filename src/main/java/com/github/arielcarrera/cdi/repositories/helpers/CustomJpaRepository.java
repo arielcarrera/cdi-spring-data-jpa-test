@@ -1,6 +1,4 @@
-package com.github.arielcarrera.cdi.repositories;
-
-import java.io.Serializable;
+package com.github.arielcarrera.cdi.repositories.helpers;
 
 import javax.persistence.EntityManager;
 
@@ -10,10 +8,10 @@ import javax.persistence.EntityManager;
  * @author Ariel Carrera
  *
  * @param <T> Type of the entity
- * @param <ID> Entity's PK
+ * @param <ID> Entity's PKzz
  */
-public interface JpaRepositoryHelper<T, ID extends Serializable> {
+public interface CustomJpaRepository {
 
-	EntityManager getEntityManager();
+	EntityManager entityManager();
 	
 }

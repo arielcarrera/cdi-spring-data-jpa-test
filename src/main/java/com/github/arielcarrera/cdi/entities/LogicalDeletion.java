@@ -10,8 +10,7 @@ public abstract class LogicalDeletion {
 	public static final int DRAFT_STATUS = 50;
 	public static final int DELETED_STATUS = 99;
 	
-
-	private int status;
+	protected int status;
 
 	public int getStatus() {
 		return status;

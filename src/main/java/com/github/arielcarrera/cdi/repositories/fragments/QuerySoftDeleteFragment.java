@@ -1,48 +1,53 @@
-package com.github.arielcarrera.cdi.repositories;
+package com.github.arielcarrera.cdi.repositories.fragments;
 
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 
+import javax.transaction.Transactional;
+import javax.transaction.Transactional.TxType;
+
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.repository.NoRepositoryBean;
-import org.springframework.data.repository.Repository;
 
 import com.github.arielcarrera.cdi.entities.LogicalDeletion;
+import com.github.arielcarrera.cdi.repositories.ReadWriteSoftDeleteRepository;
 
 /**
- * Interface of a data repository that implements read operations over an entity that extends {@link LogicalDeletion}
+ * Fragment interface of a data repository that implements read operations over an entity that extends {@link LogicalDeletion}
  * 
- * Important: If it is used with WritableRepository, it must to be placed first by ambiguity resolution. Use instead {@link ReadableWritableLogicalDeletionRepository}.
+ * Important: If it is used with WritableRepository, it must to be placed first by ambiguity resolution. Use instead {@link ReadWriteSoftDeleteRepository}.
  * 
  * @author Ariel Carrera
  *
  * @param <T> Type of the entity
  * @param <ID> Entity's PK
  */
-@NoRepositoryBean
-public interface LogicalDeletionRepository<T extends LogicalDeletion, ID extends Serializable> extends Repository<T,ID> {
+public interface QuerySoftDeleteFragment<T extends LogicalDeletion, ID extends Serializable> {
 
 	/**
 	 * Find by status property
 	 * @param status
 	 * @return filtered list of items
 	 */
+	@Transactional(value = TxType.REQUIRED)
 	public List<T> findByStatus(int status);
-	
+		
 	/**
 	 * Find by status with pagination
 	 * @param status
 	 * @param pageable
 	 * @return filtered list of items 
 	 */
-	public List<T> findByStatus(int status, Pageable pageable);
+	@Transactional(value = TxType.REQUIRED)
+	public Page<T> findByStatus(int status, Pageable pageable);
 
 	/**
 	 * Find by a list of statuses 
 	 * @param statusList
 	 * @return filtered list of items 
 	 */
+	@Transactional(value = TxType.REQUIRED)
 	public List<T> findByStatusIn(Collection<Integer> statusList);
 	
 	/**
@@ -50,13 +55,15 @@ public interface LogicalDeletionRepository<T extends LogicalDeletion, ID extends
 	 * @param statusList
 	 * @return filtered list of items 
 	 */
-	public List<T> findByStatusIn(Collection<Integer> statusList, Pageable pageable);
+	@Transactional(value = TxType.REQUIRED)
+	public Page<T> findByStatusIn(Collection<Integer> statusList, Pageable pageable);
 	
 	/**
 	 * Find by status property not equals the given
 	 * @param status
 	 * @return filtered list of items
 	 */
+	@Transactional(value = TxType.REQUIRED)
 	public List<T> findByStatusNot(int status);
 	
 	/**
@@ -64,13 +71,31 @@ public interface LogicalDeletionRepository<T extends LogicalDeletion, ID extends
 	 * @param status
 	 * @return filtered list of items
 	 */
-	public List<T> findByStatusNot(int status, Pageable pageable);
+	@Transactional(value = TxType.REQUIRED)
+	public Page<T> findByStatusNot(int status, Pageable pageable);
+	
+	/**
+	 * Find by status property not equals the given
+	 * @param statusList
+	 * @return filtered list of items
+	 */
+	@Transactional(value = TxType.REQUIRED)
+	public List<T> findByStatusNotIn(Collection<Integer> statusList);
+	
+	/**
+	 * Find by status property not equals the given with pagination
+	 * @param statusList
+	 * @return filtered list of items
+	 */
+	@Transactional(value = TxType.REQUIRED)
+	public Page<T> findByStatusNotIn(Collection<Integer> statusList, Pageable pageable);
 	
 	/**
 	 * Count by status property
 	 * @param status
 	 * @return list of items
 	 */
+	@Transactional(value = TxType.REQUIRED)
     public Long countByStatus(int status);
     
 	/**
@@ -78,6 +103,7 @@ public interface LogicalDeletionRepository<T extends LogicalDeletion, ID extends
 	 * @param statusList
 	 * @return filtered list of items 
 	 */
+	@Transactional(value = TxType.REQUIRED)
     public Long countByStatusIn(Collection<Integer> statusList);
     
 	/**
@@ -85,13 +111,23 @@ public interface LogicalDeletionRepository<T extends LogicalDeletion, ID extends
 	 * @param status
 	 * @return filtered list of items
 	 */
+	@Transactional(value = TxType.REQUIRED)
     public Long countByStatusNot(int status);
+    
+	/**
+	 * Count results by status property not equals the given
+	 * @param statusList
+	 * @return filtered list of items
+	 */
+	@Transactional(value = TxType.REQUIRED)
+    public Long countByStatusNotIn(List<Integer> statusList);
     
 	/**
 	 * Find all normal items
 	 * @param status
 	 * @return filtered list of items
 	 */
+	@Transactional(value = TxType.REQUIRED)
 	default public List<T> findAllStatusActive(){
 		return findByStatus(LogicalDeletion.NORMAL_STATUS);
 	}
@@ -101,7 +137,8 @@ public interface LogicalDeletionRepository<T extends LogicalDeletion, ID extends
 	 * @param status
 	 * @return filtered list of items
 	 */
-	default public List<T> findAllStatusActive(Pageable pageable){
+	@Transactional(value = TxType.REQUIRED)
+	default public Page<T> findAllStatusActive(Pageable pageable){
 		return findByStatus(LogicalDeletion.NORMAL_STATUS, pageable);
 	}
 	
@@ -110,6 +147,7 @@ public interface LogicalDeletionRepository<T extends LogicalDeletion, ID extends
 	 * @param status
 	 * @return filtered list of items
 	 */
+	@Transactional(value = TxType.REQUIRED)
 	default public List<T> findAllStatusNotDeleted(){
 		return findByStatusNot(LogicalDeletion.DELETED_STATUS);
 	}
@@ -119,7 +157,8 @@ public interface LogicalDeletionRepository<T extends LogicalDeletion, ID extends
 	 * @param status
 	 * @return filtered list of items
 	 */
-	default public List<T> findAllStatusNotDeleted(Pageable pageable){
+	@Transactional(value = TxType.REQUIRED)
+	default public Page<T> findAllStatusNotDeleted(Pageable pageable){
 		return findByStatusNot(LogicalDeletion.DELETED_STATUS, pageable);
 	}
 	
@@ -127,6 +166,7 @@ public interface LogicalDeletionRepository<T extends LogicalDeletion, ID extends
 	 * Find all draft items
 	 * @return filtered list of items
 	 */
+	@Transactional(value = TxType.REQUIRED)
 	default public List<T> findAllStatusDrafted(){
 		return findByStatus(LogicalDeletion.DRAFT_STATUS);
 	}
@@ -136,7 +176,8 @@ public interface LogicalDeletionRepository<T extends LogicalDeletion, ID extends
 	 * @param pageable
 	 * @return filtered list of items
 	 */
-	default public List<T> findAllStatusDrafted(Pageable pageable){
+	@Transactional(value = TxType.REQUIRED)
+	default public Page<T> findAllStatusDrafted(Pageable pageable){
 		return findByStatus(LogicalDeletion.DRAFT_STATUS, pageable);
 	}
 	
@@ -145,6 +186,7 @@ public interface LogicalDeletionRepository<T extends LogicalDeletion, ID extends
 	 * @param status
 	 * @return filtered list of items
 	 */
+	@Transactional(value = TxType.REQUIRED)
 	default public List<T> findAllStatusDeleted(){
 		return findByStatus(LogicalDeletion.DELETED_STATUS);
 	}
@@ -154,7 +196,8 @@ public interface LogicalDeletionRepository<T extends LogicalDeletion, ID extends
 	 * @param pageable
 	 * @return filtered list of items
 	 */
-	default public List<T> findAllStatusDeleted(Pageable pageable){
+	@Transactional(value = TxType.REQUIRED)
+	default public Page<T> findAllStatusDeleted(Pageable pageable){
 		return findByStatus(LogicalDeletion.DELETED_STATUS, pageable);
 	}
 	
@@ -162,6 +205,7 @@ public interface LogicalDeletionRepository<T extends LogicalDeletion, ID extends
 	 * Count all normal items
 	 * @return count
 	 */
+	@Transactional(value = TxType.REQUIRED)
 	default public Long countAllStatusActive(){
 		return countByStatus(LogicalDeletion.NORMAL_STATUS);
 	}
@@ -170,6 +214,7 @@ public interface LogicalDeletionRepository<T extends LogicalDeletion, ID extends
 	 * Count all not deleted items
 	 * @return count
 	 */
+	@Transactional(value = TxType.REQUIRED)
 	default public Long countAllStatusNotDeleted(){
 		return countByStatusNot(LogicalDeletion.DELETED_STATUS);
 	}
@@ -178,6 +223,7 @@ public interface LogicalDeletionRepository<T extends LogicalDeletion, ID extends
 	 * Count all drafted items
 	 * @return count
 	 */
+	@Transactional(value = TxType.REQUIRED)
 	default public Long countAllStatusDrafted(){
 		return countByStatus(LogicalDeletion.DRAFT_STATUS);
 	}
@@ -186,6 +232,7 @@ public interface LogicalDeletionRepository<T extends LogicalDeletion, ID extends
 	 * Count all deleted items
 	 * @return count
 	 */
+	@Transactional(value = TxType.REQUIRED)
 	default public Long countAllStatusDeleted(){
 		return countByStatus(LogicalDeletion.DELETED_STATUS);
 	}

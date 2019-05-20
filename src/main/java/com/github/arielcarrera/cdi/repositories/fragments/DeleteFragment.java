@@ -1,43 +1,20 @@
-package com.github.arielcarrera.cdi.repositories;
+package com.github.arielcarrera.cdi.repositories.fragments;
 import java.io.Serializable;
 
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.NoRepositoryBean;
-import org.springframework.data.repository.Repository;
 
 /**
- * Interface of a data repository that implements write operations over an entity
+ * Fragment interface of a data repository that implements delete operations over an entity
  * 
  * @author Ariel Carrera
  *
  * @param <T> Type of the entity
  * @param <ID> Entity's PK
  */
-@NoRepositoryBean
-public interface WritableRepository<T, ID extends Serializable> extends Repository<T,ID> {
-
-	/**
-	 * Saves a given entity. Use the returned instance for further operations as the save operation might have changed the
-	 * entity instance completely.
-	 *
-	 * @param entity must not be {@literal null}.
-	 * @return the saved entity will never be {@literal null}.
-	 */
-	@Transactional(TxType.REQUIRED)
-	<S extends T> S save(S entity);
-
-	/**
-	 * Saves all given entities.
-	 *
-	 * @param entities must not be {@literal null}.
-	 * @return the saved entities will never be {@literal null}.
-	 * @throws IllegalArgumentException in case the given entity is {@literal null}.
-	 */
-	@Transactional(TxType.REQUIRED)
-	<S extends T> Iterable<S> saveAll(Iterable<S> entities);
+public interface DeleteFragment<T, ID extends Serializable> {
 
 	/**
 	 * Deletes the entity with the given id.
@@ -77,15 +54,6 @@ public interface WritableRepository<T, ID extends Serializable> extends Reposito
 	 */
 	@Transactional(TxType.REQUIRED)
 	void flush();
-
-	/**
-	 * Saves an entity and flushes changes instantly.
-	 *
-	 * @param entity
-	 * @return the saved entity
-	 */
-	@Transactional(TxType.REQUIRED)
-	<S extends T> S saveAndFlush(S entity);
 
 	/**
 	 * Deletes the given entities in a batch which means it will create a single {@link Query}. Assume that we will clear
