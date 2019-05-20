@@ -58,6 +58,8 @@ public interface ReadWriteSoftDeleteRepository<T extends LogicalDeletion & Ident
 		Optional<T> opt = findById(entity.getId());
 		if (!opt.isPresent()) {
 			entity = save(entity);
+		} else {
+			entity = opt.get();
 		}
 		entity.statusDeleted();
 	}
@@ -95,7 +97,7 @@ public interface ReadWriteSoftDeleteRepository<T extends LogicalDeletion & Ident
 	@Transactional(TxType.REQUIRED)
 	default void deleteInBatch(Iterable<T> entities) {
 		Assert.notNull(entities, "The given Iterable of entities not be null!");
-		throw new NotSupportedException("Not implemented yet");
+		throw new NotSupportedException("Operation not supported");
 	}
 
 	/**
@@ -103,7 +105,7 @@ public interface ReadWriteSoftDeleteRepository<T extends LogicalDeletion & Ident
 	 */
 	@Transactional(TxType.REQUIRED)
 	default void deleteAllInBatch() {
-		throw new NotSupportedException("Not implemented yet");
+		throw new NotSupportedException("Operation not supported");
 		
 	}
 }

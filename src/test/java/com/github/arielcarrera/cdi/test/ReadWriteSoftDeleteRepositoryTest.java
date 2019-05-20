@@ -254,21 +254,19 @@ public class ReadWriteSoftDeleteRepositoryTest extends AbstractReadOnlySoftDelet
 		assertTrue(e1.getStatus() == LogicalDeletion.NORMAL_STATUS);                 
 	}
 
-	@Test
+	@Test(expected=NotSupportedException.class)
 	public void deleteInBatch_OK() {
 		List<TestEntity> entities = new ArrayList<>();
 		for (int i = 1; i < 4; i++) {
 			entities.add(new TestEntity(i, i + 100, i + 100));
 		}
-		getEntityManager().getTransaction().begin();
-		getTestRepository().deleteInBatch(entities);
-		getEntityManager().getTransaction().commit();
-		getEntityManager().clear();
-
-		assertTrue(getTestRepository().getOne(1).getStatus() == LogicalDeletion.DELETED_STATUS);
-		assertTrue(getTestRepository().getOne(2).getStatus() == LogicalDeletion.DELETED_STATUS);
-		assertTrue(getTestRepository().getOne(3).getStatus() == LogicalDeletion.DELETED_STATUS);
-		assertTrue(getTestRepository().getOne(4).getStatus() == LogicalDeletion.NORMAL_STATUS);
+		try {
+			getEntityManager().getTransaction().begin();
+			getTestRepository().deleteInBatch(entities);
+			fail("Exception must to be raised");
+		} finally {
+			getEntityManager().getTransaction().rollback();
+		} 
 	}
 
 	//TODO improve delete default implementation for not found
@@ -279,14 +277,11 @@ public class ReadWriteSoftDeleteRepositoryTest extends AbstractReadOnlySoftDelet
 		entities.add(new TestEntity(100, null));
 		try {
 			getTestRepository().deleteInBatch(entities);
-			getEntityManager().getTransaction().commit();			
-		} catch (Exception e) {
+			fail("Exception must to be raised");
+		} finally {
 			getEntityManager().getTransaction().rollback();
-			throw e;
-		}
-		getEntityManager().clear();
-
-		assertTrue(getTestRepository().getOne(100).getStatus() == LogicalDeletion.DELETED_STATUS);
+		} 
+		
 	}
 
 	@Test(expected = IllegalArgumentException.class)
@@ -294,10 +289,9 @@ public class ReadWriteSoftDeleteRepositoryTest extends AbstractReadOnlySoftDelet
 		getEntityManager().getTransaction().begin();
 		try {
 			getTestRepository().deleteInBatch(null);
-		} catch (Exception e) {
+		} finally {
 			getEntityManager().getTransaction().rollback();
-			throw e;
-		}
+		} 
 	}
 
 	@Test(expected=NotSupportedException.class)
@@ -305,16 +299,16 @@ public class ReadWriteSoftDeleteRepositoryTest extends AbstractReadOnlySoftDelet
 		getEntityManager().getTransaction().begin();
 		try {
 			getTestRepository().deleteInBatch(new ArrayList<TestEntity>());
-			getEntityManager().getTransaction().commit();
-		} catch (Exception e) {
+			fail("Exception must to be raised");
+		} finally {
 			getEntityManager().getTransaction().rollback();
-			throw e;
-		}
-		getEntityManager().clear();
-
-		List<TestEntity> list = getTestRepository().findAll();
-		assertTrue(list.size() == 20);
-		list.forEach(e -> assertTrue(e.getStatus() == LogicalDeletion.NORMAL_STATUS || (e.getId() == 20 && e.getStatus() == LogicalDeletion.DELETED_STATUS)));
+			
+			getEntityManager().clear();
+			List<TestEntity> list = getTestRepository().findAll();
+			assertTrue(list.size() == 20);
+			list.forEach(e -> assertTrue(e.getStatus() == LogicalDeletion.NORMAL_STATUS || (e.getId() == 20 && e.getStatus() == LogicalDeletion.DELETED_STATUS)));
+		} 
+		
 	}
 
 	@Test(expected=NotSupportedException.class)
@@ -322,15 +316,16 @@ public class ReadWriteSoftDeleteRepositoryTest extends AbstractReadOnlySoftDelet
 		getEntityManager().getTransaction().begin();
 		try {
 			getTestRepository().deleteAllInBatch();
-			getEntityManager().getTransaction().commit();
-		} catch (Exception e) {
+			fail("Exception must to be raised");
+		} finally {
 			getEntityManager().getTransaction().rollback();
-		}
-		getEntityManager().clear();
+			
+			getEntityManager().clear();
+			List<TestEntity> list = getTestRepository().findAll();
+			assertTrue(list.size() == 20);
+			list.forEach(e -> assertTrue(e.getStatus() == LogicalDeletion.NORMAL_STATUS || (e.getId() == 20 && e.getStatus() == LogicalDeletion.DELETED_STATUS)));
+		} 
 
-		List<TestEntity> list = getTestRepository().findAll();
-		assertTrue(list.size() == 20);
-		list.forEach(e -> assertTrue(e.getStatus() == LogicalDeletion.DELETED_STATUS));
 	}
 	
 	

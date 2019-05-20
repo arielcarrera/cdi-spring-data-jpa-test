@@ -22,9 +22,7 @@ import com.github.arielcarrera.cdi.repositories.helpers.CustomJpaRepository;
  * @param <T> Type of the entity
  * @param <ID> Entity's PK
  */
-public interface ReadFragment<T, ID extends Serializable> extends QueryByExampleFragment<T> 
-, CustomJpaRepository
-{
+public interface ReadFragment<T, ID extends Serializable> extends QueryByExampleFragment<T>, CustomJpaRepository {
 
 	/**
 	 * Retrieves an entity by its id.
