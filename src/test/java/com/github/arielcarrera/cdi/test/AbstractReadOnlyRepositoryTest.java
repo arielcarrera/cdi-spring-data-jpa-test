@@ -36,6 +36,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 
 import com.github.arielcarrera.cdi.entities.LogicalDeletion;
+import com.github.arielcarrera.cdi.exceptions.DataAccessException;
 import com.github.arielcarrera.cdi.repositories.ReadOnlyRepository;
 import com.github.arielcarrera.cdi.test.entities.TestEntity;
 import com.github.arielcarrera.cdi.test.repositories.TestReadWriteDeleteRepository;
@@ -54,7 +55,6 @@ public abstract class AbstractReadOnlyRepositoryTest {
 	   }
 	};
 	
-	
 	@Inject
 	protected EntityManager entityManager;
 
@@ -72,7 +72,6 @@ public abstract class AbstractReadOnlyRepositoryTest {
 	
 	@Before
 	public void load() {
-		getEntityManager().getTransaction().begin();
 		List<TestEntity> points = new ArrayList<>();
 		for (int i = 1; i < 20; i++) {
 			points.add(new TestEntity(i, i + 100, i + 100, LogicalDeletion.NORMAL_STATUS));
@@ -80,8 +79,6 @@ public abstract class AbstractReadOnlyRepositoryTest {
 		points.add(new TestEntity(20, 110, null, LogicalDeletion.DELETED_STATUS));
 	
 		getLoaderRepository().saveAll(points);
-		
-		getEntityManager().getTransaction().commit();
 	}
 
 	public TestReadWriteDeleteRepository getLoaderRepository(){
@@ -94,11 +91,10 @@ public abstract class AbstractReadOnlyRepositoryTest {
 	
 	public abstract ReadOnlyRepository<TestEntity, Integer> getTestRepository();
 
-	//TODO descomentar test
-//	@Test
-//	public void entityManager_OK() {
-//		assertNotNull(getTestRepository().entityManager());
-//	}
+	@Test
+	public void entityManager_OK() {
+		assertNotNull(getTestRepository().entityManager());
+	}
 	
 	@Test
 	public void findById_OK() {
@@ -266,9 +262,8 @@ public abstract class AbstractReadOnlyRepositoryTest {
 		assertFalse(op.isPresent());
 	}
 
-	@Test(expected = NonUniqueResultException.class)
+	@Test(expected = DataAccessException.class)
 	public void findOne_example_ErrorMultipleResults() throws Throwable {
-		//TODO improve adding translation / mapping of Jpa exceptions
 		Example<TestEntity> example = Example.of(new TestEntity(null, 110, null),
 				ExampleMatcher.matchingAny().withIgnoreNullValues().withIgnorePaths("status"));
 		try {

@@ -16,10 +16,12 @@
 
 package org.springframework.data.repository.cdi;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.repository.core.NamedQueries;
+import org.springframework.data.repository.core.support.QueryCreationListener;
 import org.springframework.data.repository.core.support.RepositoryProxyPostProcessor;
 import org.springframework.data.repository.query.QueryLookupStrategy;
 import org.springframework.data.repository.query.QueryMethodEvaluationContextProvider;
@@ -29,6 +31,7 @@ import org.springframework.data.repository.query.QueryMethodEvaluationContextPro
  *
  * @author Mark Paluch
  * @author Fabian Henniges
+ * @author Ariel Carrera
  */
 public interface CdiRepositoryConfiguration {
 
@@ -82,15 +85,29 @@ public interface CdiRepositoryConfiguration {
 		return "Impl";
 	}
 	
-	//CHANGE
+	//CHANGE ADDED PR
 	/**
-	 * Return the {@link Class repository proxy post processor class list} to add to the proxy. Can be {@link Optional#empty()} .
+	 * Returns the list of {@link RepositoryProxyPostProcessor} to be used during repository proxy creation. Can be
+	 * {@link Collections#emptyList()} .
 	 * 
-	 * @return the optional list of repository proxy post processor class list to use, can be {@link Optional#empty()}, must not be {@literal null}.
+	 * @return the list of repository proxy post processors to use, can be {@link Collections#emptyList()}, must not be
+	 *         {@literal null}.
 	 * @since 2.2
 	 */
-	default Optional<List<RepositoryProxyPostProcessor>> getRepositoryProxyPostProcessorClassList() {
-		return Optional.empty();
+	default List<RepositoryProxyPostProcessor> getRepositoryProxyPostProcessors() {
+		return Collections.emptyList();
 	}
-	//END CHANGE
+
+	/**
+	 * Returns the list of {@link QueryCreationListener} to be used during repository proxy creation. Can be
+	 * {@link Collections#emptyList()} .
+	 * 
+	 * @return the list query creation listeners to use, can be {@link Collections#emptyList()}, must not be
+	 *         {@literal null}.
+	 * @since 2.2
+	 */
+	default List<QueryCreationListener<?>> getQueryCreationListeners() {
+		return Collections.emptyList();
+	}
+	//END CHANGE ADDED PR
 }

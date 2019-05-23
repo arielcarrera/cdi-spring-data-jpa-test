@@ -12,6 +12,7 @@ import org.junit.Test;
 import org.springframework.dao.EmptyResultDataAccessException;
 
 import com.github.arielcarrera.cdi.entities.LogicalDeletion;
+import com.github.arielcarrera.cdi.exceptions.DataAccessException;
 import com.github.arielcarrera.cdi.exceptions.NotSupportedException;
 import com.github.arielcarrera.cdi.test.entities.TestEntity;
 import com.github.arielcarrera.cdi.test.repositories.TestReadWriteSoftDeleteRepository;
@@ -35,43 +36,37 @@ public class ReadWriteSoftDeleteRepositoryTest extends AbstractReadOnlySoftDelet
 
 	@Test
 	public void deleteById_OK() {
-		getEntityManager().getTransaction().begin();
 		getTestRepository().deleteById(1);
-		getEntityManager().getTransaction().commit();
 		getEntityManager().clear();
 
 		assertTrue(getTestRepository().getOne(1).getStatus() == LogicalDeletion.DELETED_STATUS);
 	}
 
-	@Test(expected = EmptyResultDataAccessException.class)
+	@Test(expected = DataAccessException.class)
 	public void deleteById_NotFound() {
 		try {
-			getEntityManager().getTransaction().begin();
 			getTestRepository().deleteById(200);
 			fail("Exception must to be raised due to entity not exist");
 		} catch (Exception e) {
-			getEntityManager().getTransaction().rollback();
+			assertTrue(e.getCause() instanceof EmptyResultDataAccessException);
 			throw e;
 		}
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test(expected = DataAccessException.class)
 	public void deleteById_Null() {
 		try {
-			getEntityManager().getTransaction().begin();
 			getTestRepository().deleteById(null);
 			fail("Exception must to be raised due to null parameter value");
-		} catch (Exception e) {
-			getEntityManager().getTransaction().rollback();
+		} catch (DataAccessException e) {
+			assertTrue(e.getCause() instanceof IllegalArgumentException);
 			throw e;
 		}
 	}
 
 	@Test
 	public void delete_attached_entity_OK() {
-		getEntityManager().getTransaction().begin();
 		getTestRepository().delete(getTestRepository().getOne(1));
-		getEntityManager().getTransaction().commit();
 		getEntityManager().clear();
 
 		assertTrue(getTestRepository().getOne(1).getStatus() == LogicalDeletion.DELETED_STATUS);
@@ -79,9 +74,7 @@ public class ReadWriteSoftDeleteRepositoryTest extends AbstractReadOnlySoftDelet
 
 	@Test
 	public void delete_detached_entity_OK() {
-		getEntityManager().getTransaction().begin();
 		getTestRepository().delete(new TestEntity(1, null));
-		getEntityManager().getTransaction().commit();
 		getEntityManager().clear();
 
 		assertTrue(getTestRepository().getOne(1).getStatus() == LogicalDeletion.DELETED_STATUS);
@@ -89,9 +82,7 @@ public class ReadWriteSoftDeleteRepositoryTest extends AbstractReadOnlySoftDelet
 
 	@Test
 	public void delete_detached_entity_updated_OK() {
-		getEntityManager().getTransaction().begin();
 		getTestRepository().delete(new TestEntity(1, 1));
-		getEntityManager().getTransaction().commit();
 		getEntityManager().clear();
 
 		assertTrue(getTestRepository().getOne(1).getStatus() == LogicalDeletion.DELETED_STATUS);
@@ -105,22 +96,19 @@ public class ReadWriteSoftDeleteRepositoryTest extends AbstractReadOnlySoftDelet
 	// implementation
 	@Test
 	public void delete_detached_entity_NotFound() {
-		getEntityManager().getTransaction().begin();
 		getTestRepository().delete(new TestEntity(100, null));
-		getEntityManager().getTransaction().commit();
 		getEntityManager().clear();
 		//it will do insert and update (With default repository implementation)
 		assertTrue(getTestRepository().getOne(100).getStatus() == LogicalDeletion.DELETED_STATUS);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test(expected = DataAccessException.class)
 	public void delete_entity_Null() {
-		getEntityManager().getTransaction().begin();
 		try {
 			getTestRepository().delete(null);
 			fail("Exception must to be raised due to null parameter value");
-		} catch (Exception e) {
-			getEntityManager().getTransaction().rollback();
+		} catch (DataAccessException e) {
+			assertTrue(e.getCause() instanceof IllegalArgumentException);
 			throw e;
 		}
 	}
@@ -131,9 +119,7 @@ public class ReadWriteSoftDeleteRepositoryTest extends AbstractReadOnlySoftDelet
 		for (int i = 1; i < 4; i++) {
 			entities.add(new TestEntity(i, i + 100, i + 100));
 		}
-		getEntityManager().getTransaction().begin();
 		getTestRepository().deleteAll(entities);
-		getEntityManager().getTransaction().commit();
 		getEntityManager().clear();
 
 		assertTrue(getTestRepository().getOne(1).getStatus() == LogicalDeletion.DELETED_STATUS);
@@ -148,9 +134,7 @@ public class ReadWriteSoftDeleteRepositoryTest extends AbstractReadOnlySoftDelet
 		for (int i = 1; i < 4; i++) {
 			entities.add(new TestEntity(i, i + 1000, null));
 		}
-		getEntityManager().getTransaction().begin();
 		getTestRepository().deleteAll(entities);
-		getEntityManager().getTransaction().commit();
 		getEntityManager().clear();
 
 		assertTrue(getTestRepository().getOne(1).getStatus() == LogicalDeletion.DELETED_STATUS);
@@ -161,13 +145,11 @@ public class ReadWriteSoftDeleteRepositoryTest extends AbstractReadOnlySoftDelet
 
 	@Test
 	public void deleteAll_iterable_attached_OK() {
-		getEntityManager().getTransaction().begin();
 		List<TestEntity> entities = new ArrayList<>();
 		for (int i = 1; i < 4; i++) {
 			entities.add(getTestRepository().getOne(i));
 		}
 		getTestRepository().deleteAll(entities);
-		getEntityManager().getTransaction().commit();
 		getEntityManager().clear();
 
 		assertTrue(getTestRepository().getOne(1).getStatus() == LogicalDeletion.DELETED_STATUS);
@@ -178,32 +160,27 @@ public class ReadWriteSoftDeleteRepositoryTest extends AbstractReadOnlySoftDelet
 
 	@Test
 	public void deleteAll_iterable_NotFound() {
-		getEntityManager().getTransaction().begin();
 		List<TestEntity> entities = new ArrayList<>();
 		entities.add(new TestEntity(100, null));
 		getTestRepository().deleteAll(entities);
-		getEntityManager().getTransaction().commit();
 		getEntityManager().clear();
 
 		assertTrue(getTestRepository().getOne(100).getStatus() == LogicalDeletion.DELETED_STATUS);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test(expected = DataAccessException.class)
 	public void deleteAll_iterable_Null() {
-		getEntityManager().getTransaction().begin();
 		try {
 			getTestRepository().deleteAll(null);
-		} catch (Exception e) {
-			getEntityManager().getTransaction().rollback();
+		} catch (DataAccessException e) {
+			assertTrue(e.getCause() instanceof IllegalArgumentException);
 			throw e;
 		}
 	}
 
 	@Test
 	public void deleteAll_iterable_Empty() {
-		getEntityManager().getTransaction().begin();
 		getTestRepository().deleteAll(new ArrayList<TestEntity>());
-		getEntityManager().getTransaction().commit();
 		getEntityManager().clear();
 		
 		List<TestEntity> list = getTestRepository().findAll();
@@ -213,9 +190,7 @@ public class ReadWriteSoftDeleteRepositoryTest extends AbstractReadOnlySoftDelet
 
 	@Test
 	public void deleteAll_OK() {
-		getEntityManager().getTransaction().begin();
 		getTestRepository().deleteAll();
-		getEntityManager().getTransaction().commit();
 		getEntityManager().clear();
 
 		List<TestEntity> list = getTestRepository().findAll();
@@ -254,76 +229,76 @@ public class ReadWriteSoftDeleteRepositoryTest extends AbstractReadOnlySoftDelet
 		assertTrue(e1.getStatus() == LogicalDeletion.NORMAL_STATUS);                 
 	}
 
-	@Test(expected=NotSupportedException.class)
+	@Test(expected=DataAccessException.class)
 	public void deleteInBatch_OK() {
 		List<TestEntity> entities = new ArrayList<>();
 		for (int i = 1; i < 4; i++) {
 			entities.add(new TestEntity(i, i + 100, i + 100));
 		}
 		try {
-			getEntityManager().getTransaction().begin();
 			getTestRepository().deleteInBatch(entities);
 			fail("Exception must to be raised");
-		} finally {
-			getEntityManager().getTransaction().rollback();
+		} catch(DataAccessException e) {
+			assertTrue(e.getCause() instanceof NotSupportedException);
+			throw e;
 		} 
 	}
 
 	//TODO improve delete default implementation for not found
-	@Test(expected = NotSupportedException.class)
+	@Test(expected = DataAccessException.class)
 	public void deleteInBatch_NotFound() {
-		getEntityManager().getTransaction().begin();
 		List<TestEntity> entities = new ArrayList<>();
 		entities.add(new TestEntity(100, null));
 		try {
 			getTestRepository().deleteInBatch(entities);
 			fail("Exception must to be raised");
-		} finally {
-			getEntityManager().getTransaction().rollback();
+		} catch(DataAccessException e) {
+			assertTrue(e.getCause() instanceof NotSupportedException);
+			throw e;
 		} 
 		
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test(expected = DataAccessException.class)
 	public void deleteInBatch_Null() {
-		getEntityManager().getTransaction().begin();
 		try {
 			getTestRepository().deleteInBatch(null);
-		} finally {
-			getEntityManager().getTransaction().rollback();
-		} 
+		} catch (DataAccessException e) {
+			assertTrue(e.getCause() instanceof IllegalArgumentException);
+			throw e;
+		}
 	}
 
-	@Test(expected=NotSupportedException.class)
+	@Test(expected=DataAccessException.class)
 	public void deleteInBatch_Empty() {
-		getEntityManager().getTransaction().begin();
 		try {
 			getTestRepository().deleteInBatch(new ArrayList<TestEntity>());
 			fail("Exception must to be raised");
-		} finally {
-			getEntityManager().getTransaction().rollback();
-			
+		} catch(DataAccessException e) {
+			assertTrue(e.getCause() instanceof NotSupportedException);
+
 			getEntityManager().clear();
 			List<TestEntity> list = getTestRepository().findAll();
 			assertTrue(list.size() == 20);
-			list.forEach(e -> assertTrue(e.getStatus() == LogicalDeletion.NORMAL_STATUS || (e.getId() == 20 && e.getStatus() == LogicalDeletion.DELETED_STATUS)));
+			list.forEach(a -> assertTrue(a.getStatus() == LogicalDeletion.NORMAL_STATUS || (a.getId() == 20 && a.getStatus() == LogicalDeletion.DELETED_STATUS)));
+			throw e;
 		} 
 		
 	}
 
-	@Test(expected=NotSupportedException.class)
+	@Test(expected=DataAccessException.class)
 	public void deleteAllInBatch_OK() {
-		getEntityManager().getTransaction().begin();
 		try {
 			getTestRepository().deleteAllInBatch();
 			fail("Exception must to be raised");
-		} finally {
-			getEntityManager().getTransaction().rollback();
+		} catch(DataAccessException e) {
+			assertTrue(e.getCause() instanceof NotSupportedException);
 			
 			getEntityManager().clear();
 			List<TestEntity> list = getTestRepository().findAll();
 			assertTrue(list.size() == 20);
-			list.forEach(e -> assertTrue(e.getStatus() == LogicalDeletion.NORMAL_STATUS || (e.getId() == 20 && e.getStatus() == LogicalDeletion.DELETED_STATUS)));
+			list.forEach(a -> assertTrue(a.getStatus() == LogicalDeletion.NORMAL_STATUS || (a.getId() == 20 && a.getStatus() == LogicalDeletion.DELETED_STATUS)));
+			throw e;
 		} 
 
 	}

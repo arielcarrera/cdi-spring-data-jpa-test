@@ -8,11 +8,10 @@ import static org.junit.Assert.fail;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.RollbackException;
-
 import org.hibernate.exception.ConstraintViolationException;
 import org.junit.Test;
 
+import com.github.arielcarrera.cdi.exceptions.DataAccessException;
 import com.github.arielcarrera.cdi.repositories.ReadWriteRepository;
 import com.github.arielcarrera.cdi.test.entities.TestEntity;
 
@@ -27,9 +26,7 @@ public abstract class AbstractReadWriteRepositoryTest extends AbstractReadOnlyRe
 
 	@Test
 	public void save_new_OK() {
-		getEntityManager().getTransaction().begin();
 		TestEntity result = getTestRepository().save(new TestEntity(21, 121));
-		getEntityManager().getTransaction().commit();
 		getEntityManager().clear();
 		assertNotNull(result);
 		assertTrue(result.getId().equals(21));
@@ -43,9 +40,7 @@ public abstract class AbstractReadWriteRepositoryTest extends AbstractReadOnlyRe
 
 	@Test
 	public void save_update_OK() {
-		getEntityManager().getTransaction().begin();
 		TestEntity result = getTestRepository().save(new TestEntity(1, 121));
-		getEntityManager().getTransaction().commit();
 		getEntityManager().clear();
 		assertNotNull(result);
 		assertTrue(result.getId().equals(1));
@@ -57,41 +52,35 @@ public abstract class AbstractReadWriteRepositoryTest extends AbstractReadOnlyRe
 		assertTrue(e.getValue().equals(121));
 	}
 
-	@Test(expected = RollbackException.class)
+	@Test(expected = DataAccessException.class)
 	public void save_new_NotUnique() {
 		try {
-			getEntityManager().getTransaction().begin();
 			getTestRepository().save(new TestEntity(21, 121, 101));
-			getEntityManager().getTransaction().commit();
 			fail("Exception must to be raised due to non unique constraint violation");
-		} catch(RollbackException e) {
-			assertTrue(e.getCause().getCause().getCause().getCause().getCause() instanceof ConstraintViolationException);
+		} catch(DataAccessException e) {
+			assertTrue(e.getCause().getCause() instanceof ConstraintViolationException);
 			throw e;
 		}
 	}
 
-	@Test(expected = RollbackException.class)
+	@Test(expected = DataAccessException.class)
 	public void save_update_NotUnique() {
 		try {
-			getEntityManager().getTransaction().begin();
 			getTestRepository().save(new TestEntity(2, 102, 101));
-			getEntityManager().getTransaction().commit();
 			fail("Exception must to be raised due to non unique constraint violation");
-		} catch(RollbackException e) {
-			assertTrue(e.getCause().getCause().getCause().getCause().getCause() instanceof ConstraintViolationException);
+		} catch(DataAccessException e) {
+			assertTrue(e.getCause().getCause() instanceof ConstraintViolationException);
 			throw e;
 		}
 	}
 
 	@Test
 	public void saveAll_new_OK() {
-		getEntityManager().getTransaction().begin();
 		List<TestEntity> entities = new ArrayList<>();
 		for (int i = 21; i < 24; i++) {
 			entities.add(new TestEntity(i, i + 100, i + 100));
 		}
 		Iterable<TestEntity> result = getLoaderRepository().saveAll(entities);
-		getEntityManager().getTransaction().commit();
 		getEntityManager().clear();
 		
 		assertNotNull(result);
@@ -121,13 +110,11 @@ public abstract class AbstractReadWriteRepositoryTest extends AbstractReadOnlyRe
 
 	@Test
 	public void saveAll_update_OK() {
-		getEntityManager().getTransaction().begin();
 		List<TestEntity> entities = new ArrayList<>();
 		for (int i = 1; i < 4; i++) {
 			entities.add(new TestEntity(i, i + 200, i + 200));
 		}
 		Iterable<TestEntity> result = getLoaderRepository().saveAll(entities);
-		getEntityManager().getTransaction().commit();
 		assertNotNull(result);
 		int count = 0;
 		boolean has1 = false, has2 = false, has3 = false;
@@ -166,7 +153,7 @@ public abstract class AbstractReadWriteRepositoryTest extends AbstractReadOnlyRe
 		assertTrue(e.getValue().equals(203));
 	}
 
-	@Test(expected = RollbackException.class)
+	@Test(expected = DataAccessException.class)
 	public void saveAll_NotUnique() {
 		List<TestEntity> entities = new ArrayList<>();
 		entities.add(new TestEntity(21, 221, 101));
@@ -174,30 +161,21 @@ public abstract class AbstractReadWriteRepositoryTest extends AbstractReadOnlyRe
 			entities.add(new TestEntity(i, i + 200, i + 200));
 		}
 		try {
-			getEntityManager().getTransaction().begin();
 			getTestRepository().saveAll(entities);
-			getEntityManager().getTransaction().commit();
 			fail("Exception must to be raised due to non unique constraint violation");
-		} catch(RollbackException e) {
+		} catch(DataAccessException e) {
 			getEntityManager().clear();
-			assertTrue(e.getCause().getCause().getCause().getCause().getCause() instanceof ConstraintViolationException);
+			assertTrue(e.getCause().getCause() instanceof ConstraintViolationException);
 			assertFalse(getTestRepository().existsById(21));
 			assertFalse(getTestRepository().existsById(22));
 			assertFalse(getTestRepository().existsById(23));
 			throw e;
 		} 
-//		catch(Exception e) {
-//			if (entityManager.isJoinedToTransaction() && getEntityManager().getTransaction().isActive()) {
-//				getEntityManager().getTransaction().rollback();
-//			}
-//		}
 	}
 
 	@Test
 	public void saveAndFlush_OK() {
-		getEntityManager().getTransaction().begin();
 		TestEntity result = getTestRepository().saveAndFlush(new TestEntity(21, 121));
-		getEntityManager().getTransaction().commit();
 		getEntityManager().clear();
 		
 		assertNotNull(result);

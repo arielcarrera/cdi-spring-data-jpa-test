@@ -118,9 +118,7 @@ public abstract class AbstractReadOnlySoftDeleteRepositoryTest extends AbstractR
 
 	@Test
 	public void findByStatusNot_NoResult() {
-		getEntityManager().getTransaction().begin();
 		getLoaderRepository().deleteById(20);
-		getEntityManager().getTransaction().commit();
 		getEntityManager().clear();
 		List<TestEntity> l = getTestRepository().findByStatusNot(LogicalDeletion.NORMAL_STATUS);
 		assertNotNull(l);
@@ -285,9 +283,7 @@ public abstract class AbstractReadOnlySoftDeleteRepositoryTest extends AbstractR
 
 	@Test
 	public void findAllStatusDrafted_OK() {
-		getEntityManager().getTransaction().begin();
 		getLoaderRepository().save(new TestEntity(21, 121, null, LogicalDeletion.DRAFT_STATUS));
-		getEntityManager().getTransaction().commit();
 		getEntityManager().clear();
 		
 		List<TestEntity> l = getTestRepository().findAllStatusDrafted();
@@ -298,14 +294,12 @@ public abstract class AbstractReadOnlySoftDeleteRepositoryTest extends AbstractR
 
 	@Test
 	public void findAllStatusDrafted_pageable_OK() {
-		getEntityManager().getTransaction().begin();
-		getLoaderRepository().save(new TestEntity(21, 121, null, LogicalDeletion.DRAFT_STATUS));
-		getLoaderRepository().save(new TestEntity(22, 122, null, LogicalDeletion.DRAFT_STATUS));
-		getLoaderRepository().save(new TestEntity(23, 123, null, LogicalDeletion.DRAFT_STATUS));
-		getLoaderRepository().save(new TestEntity(24, 124, null, LogicalDeletion.DRAFT_STATUS));
-		getLoaderRepository().save(new TestEntity(25, 125, null, LogicalDeletion.DRAFT_STATUS));
-		getLoaderRepository().save(new TestEntity(26, 126, null, LogicalDeletion.DRAFT_STATUS));
-		getEntityManager().getTransaction().commit();
+		getLoaderRepository().saveAll(Arrays.asList(new TestEntity(21, 121, null, LogicalDeletion.DRAFT_STATUS),
+				new TestEntity(22, 122, null, LogicalDeletion.DRAFT_STATUS),
+				new TestEntity(23, 123, null, LogicalDeletion.DRAFT_STATUS),
+				new TestEntity(24, 124, null, LogicalDeletion.DRAFT_STATUS),
+				new TestEntity(25, 125, null, LogicalDeletion.DRAFT_STATUS),
+				new TestEntity(26, 126, null, LogicalDeletion.DRAFT_STATUS)));
 		getEntityManager().clear();
 		
 		Page<TestEntity> p = getTestRepository().findAllStatusDrafted(PageRequest.of(1, 3, Sort.by(Direction.DESC, "id")));
@@ -319,9 +313,7 @@ public abstract class AbstractReadOnlySoftDeleteRepositoryTest extends AbstractR
 
 	@Test
 	public void findAllStatusDrafted_pageable_PageNotFound() {
-		getEntityManager().getTransaction().begin();
 		getLoaderRepository().save(new TestEntity(21, 121, null, LogicalDeletion.DRAFT_STATUS));
-		getEntityManager().getTransaction().commit();
 		getEntityManager().clear();
 		
 		Page<TestEntity> p = getTestRepository().findAllStatusDrafted(PageRequest.of(1, 10, Sort.by(Direction.DESC, "id")));

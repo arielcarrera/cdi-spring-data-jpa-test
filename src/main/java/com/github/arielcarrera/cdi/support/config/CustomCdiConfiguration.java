@@ -2,7 +2,6 @@ package com.github.arielcarrera.cdi.support.config;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.data.repository.cdi.CdiRepositoryConfiguration;
 import org.springframework.data.repository.core.support.RepositoryProxyPostProcessor;
@@ -21,8 +20,8 @@ public class CustomCdiConfiguration implements CdiRepositoryConfiguration {
 
 
 	@Override
-	public Optional<List<RepositoryProxyPostProcessor>> getRepositoryProxyPostProcessorClassList() {
-		return Optional.of(Arrays.asList(new CustomTransactionalRepositoryProxyPostProcessor()));
+	public List<RepositoryProxyPostProcessor> getRepositoryProxyPostProcessors() {
+		return Arrays.asList(new DataAccessExceptionMapperPostProcessor(), new CustomTransactionalPostProcessor());
 	}
 	
 }

@@ -58,22 +58,22 @@ import org.springframework.util.StringUtils;
  * @author Peter Rietzler
  * @author Jens Schauder
  * @author Christoph Strobl
+ * @author Ariel Carrera
  */
 public abstract class CdiRepositoryBean<T> implements Bean<T>, PassivationCapable {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CdiRepositoryBean.class);
 	private static final CdiRepositoryConfiguration DEFAULT_CONFIGURATION = DefaultCdiRepositoryConfiguration.INSTANCE;
-	//CHANGE
+	
 	protected final Set<Annotation> qualifiers;
 	protected final Class<T> repositoryType;
 	protected final CdiRepositoryContext context;
-	
 	protected final BeanManager beanManager;
 	
 	protected final String passivationId;
 
 	protected transient @Nullable T repoInstance;
-	//END CHANGE
+
 	/**
 	 * Creates a new {@link CdiRepositoryBean}.
 	 *
@@ -514,9 +514,10 @@ public abstract class CdiRepositoryBean<T> implements Bean<T>, PassivationCapabl
 		configuration.getNamedQueries().ifPresent(repositoryFactory::setNamedQueries);
 		configuration.getQueryLookupStrategy().ifPresent(repositoryFactory::setQueryLookupStrategyKey);
 		configuration.getRepositoryBeanClass().ifPresent(repositoryFactory::setRepositoryBaseClass);
-		//CHANGE
-		configuration.getRepositoryProxyPostProcessorClassList().ifPresent(list -> list.forEach(repositoryFactory::addRepositoryProxyPostProcessor));
-		//END CHANGE
+		//CHANGE ADDED PR
+		configuration.getRepositoryProxyPostProcessors().forEach(repositoryFactory::addRepositoryProxyPostProcessor);
+		configuration.getQueryCreationListeners().forEach(repositoryFactory::addQueryCreationListener);
+		//END CHANGE ADDED PR
 	}
 
 	/**
