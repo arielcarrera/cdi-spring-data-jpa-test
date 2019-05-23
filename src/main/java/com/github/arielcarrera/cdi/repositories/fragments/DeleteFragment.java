@@ -14,6 +14,7 @@ import org.springframework.data.jpa.repository.Query;
  * @param <T> Type of the entity
  * @param <ID> Entity's PK
  */
+@Transactional(TxType.REQUIRED)
 public interface DeleteFragment<T, ID extends Serializable> {
 
 	/**
@@ -22,7 +23,6 @@ public interface DeleteFragment<T, ID extends Serializable> {
 	 * @param id must not be {@literal null}.
 	 * @throws IllegalArgumentException in case the given {@code id} is {@literal null}
 	 */
-	@Transactional(TxType.REQUIRED)
 	void deleteById(ID id);
 
 	/**
@@ -31,7 +31,6 @@ public interface DeleteFragment<T, ID extends Serializable> {
 	 * @param entity
 	 * @throws IllegalArgumentException in case the given entity is {@literal null}.
 	 */
-	@Transactional(TxType.REQUIRED)
 	void delete(T entity);
 
 	/**
@@ -40,19 +39,16 @@ public interface DeleteFragment<T, ID extends Serializable> {
 	 * @param entities
 	 * @throws IllegalArgumentException in case the given {@link Iterable} is {@literal null}.
 	 */
-	@Transactional(TxType.REQUIRED)
 	void deleteAll(Iterable<? extends T> entities);
 
 	/**
 	 * Deletes all entities managed by the repository.
 	 */
-	@Transactional(TxType.REQUIRED)
 	void deleteAll();
 
 	/**
 	 * Flushes all pending changes to the database.
 	 */
-	@Transactional(TxType.REQUIRED)
 	void flush();
 
 	/**
@@ -61,13 +57,11 @@ public interface DeleteFragment<T, ID extends Serializable> {
 	 *
 	 * @param entities
 	 */
-	@Transactional(TxType.REQUIRED)
 	void deleteInBatch(Iterable<T> entities);
 
 	/**
 	 * Deletes all entities in a batch call.
 	 */
-	@Transactional(TxType.REQUIRED)
 	void deleteAllInBatch();
 
 }

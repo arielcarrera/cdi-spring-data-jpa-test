@@ -15,20 +15,21 @@
  */
 package org.springframework.data.repository.config;
 
+import lombok.RequiredArgsConstructor;
+
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.ClassMetadata;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.data.repository.NoRepositoryBean;
 import org.springframework.util.Assert;
-
-import lombok.RequiredArgsConstructor;
 
 /**
  * Value object for a discovered Repository fragment interface.
@@ -56,18 +57,13 @@ public class FragmentMetadata {
 		//BEGIN CHANGE
 		//search for inherited interfaces
 		Set<String> data = new HashSet<String>();
+		
 		for (String in : interfaceNames) {
 			data.addAll(lookUpHierarchy(in));
 		}
 		
-		Set<String> data2 = data.stream().filter(this::isCandidate).collect(Collectors.toSet());
-		
 		return data.stream().filter(this::isCandidate);
 		
-		//return Arrays.stream(interfaceNames).flatMap(in -> lookUpHierarchy(in).stream()).filter(this::isCandidate);
-		
-//		return Arrays.stream() //
-//				.filter(this::isCandidate);
 		//END CHANGE
 	}
 
@@ -106,38 +102,42 @@ public class FragmentMetadata {
 	}
 	
 	//CHANGE ADDED
+	private static final String CLASS_LOADING_ERROR = "Could not load type %s.";
+	private static final Logger LOGGER = LoggerFactory.getLogger(FragmentMetadata.class);
 	
-	private static Set<String> lookUpHierarchy(String cls) {
-		if(cls == null || cls.equals(Object.class.getName())) throw new IllegalArgumentException("Invalid parameters in lookUpHierarchy invocation");
+	private Set<String> lookUpHierarchy(String cls) {
+		if (cls == null || cls.equals(Object.class.getName()))
+			throw new IllegalArgumentException("Invalid parameters in lookUpHierarchy invocation");
 		Set<String> interfacesSet = new HashSet<String>();
 		interfacesSet.add(cls);
 		Class<?> ic = null;
 		try {
-			 ic = Class.forName(cls);
+			ic = Class.forName(cls);
 		} catch (ClassNotFoundException e) {
-		        e.printStackTrace();
+			LOGGER.warn(String.format(CLASS_LOADING_ERROR, cls), e);
 		}
-		
-        for (final Class<?> clazz : ic.getInterfaces()) {
-        	String clazzName = clazz.getName();
-        	if (!interfacesSet.contains(clazzName)) {
-        	interfacesSet.add(clazzName);
-        	lookUpHierarchy(clazz, interfacesSet);
-        	}
-        }
-        return interfacesSet;
+		for (final Class<?> clazz : ic.getInterfaces()) {
+			String clazzName = clazz.getName();
+			if (!interfacesSet.contains(clazzName)) {
+				interfacesSet.add(clazzName);
+				lookUpHierarchy(clazz, interfacesSet);
+			}
+		}
+		return interfacesSet;
 	}
 	
-	private static void lookUpHierarchy(Class<?> cls, Set<String> interfacesSet) {
-		if(cls == null || cls.equals(Object.class.getName()) || interfacesSet == null) throw new IllegalArgumentException("Invalid parameters in lookUpHierarchy invocation");
-		
-        for (final Class<?> clazz : cls.getInterfaces()) {
-        	String clazzName = clazz.getName();
-        	if (!interfacesSet.contains(clazzName)) {
-            	interfacesSet.add(clazzName);
-            	lookUpHierarchy(clazz, interfacesSet);
-        	}
-        }
+	private void lookUpHierarchy(Class<?> cls, Set<String> interfacesSet) {
+		if (cls == null || cls.getName().equals(Object.class.getName()) || interfacesSet == null) {
+			throw new IllegalArgumentException("Invalid parameters in lookUpHierarchy invocation");
+		}
+
+		for (final Class<?> clazz : cls.getInterfaces()) {
+			String clazzName = clazz.getName();
+			if (!interfacesSet.contains(clazzName)) {
+				interfacesSet.add(clazzName);
+				lookUpHierarchy(clazz, interfacesSet);
+			}
+		}
 	}
 	
 	//END CHANGE

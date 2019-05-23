@@ -12,6 +12,7 @@ import javax.transaction.Transactional.TxType;
  * @param <T> Type of the entity
  * @param <ID> Entity's PK
  */
+@Transactional(TxType.REQUIRED)
 public interface CreateUpdateFragment<T, ID extends Serializable> {
 
 	/**
@@ -21,7 +22,6 @@ public interface CreateUpdateFragment<T, ID extends Serializable> {
 	 * @param entity must not be {@literal null}.
 	 * @return the saved entity will never be {@literal null}.
 	 */
-	@Transactional(TxType.REQUIRED)
 	<S extends T> S save(S entity);
 
 	/**
@@ -31,7 +31,6 @@ public interface CreateUpdateFragment<T, ID extends Serializable> {
 	 * @return the saved entities will never be {@literal null}.
 	 * @throws IllegalArgumentException in case the given entity is {@literal null}.
 	 */
-	@Transactional(TxType.REQUIRED)
 	<S extends T> Iterable<S> saveAll(Iterable<S> entities);
 
 	/**
@@ -40,12 +39,10 @@ public interface CreateUpdateFragment<T, ID extends Serializable> {
 	 * @param entity
 	 * @return the saved entity
 	 */
-	@Transactional(TxType.REQUIRED)
 	<S extends T> S saveAndFlush(S entity);
 
 	/**
 	 * Flushes all pending changes to the database.
 	 */
-	@Transactional(TxType.REQUIRED)
 	void flush();
 }

@@ -1,18 +1,3 @@
-/*
- * Copyright 2016-2019 the original author or authors.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.github.arielcarrera.cdi.repositories.fragments;
 
 import java.util.Optional;
@@ -27,19 +12,12 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.repository.query.QueryByExampleExecutor;
 
 /**
- * Interface to allow execution of Query by Example {@link Example} instances.
- *
- * @param <T>
- * @author Mark Paluch
- * @author Christoph Strobl
- * @since 1.12
- */
-/**
  * Interface based on {@link QueryByExampleExecutor} from Mark Paluch & Chrisoph Strobl
+ * 
  * @author Ariel Carrera <carreraariel@gmail.com>
- *
  * @param <T>
  */
+@Transactional(TxType.REQUIRED)
 public interface QueryByExampleFragment<T> {
 
 	/**
@@ -49,7 +27,6 @@ public interface QueryByExampleFragment<T> {
 	 * @return a single entity matching the given {@link Example} or {@link Optional#empty()} if none was found.
 	 * @throws org.springframework.dao.IncorrectResultSizeDataAccessException if the Example yields more than one result.
 	 */
-	@Transactional(value = TxType.REQUIRED)
 	<S extends T> Optional<S> findOne(Example<S> example);
 
 	/**
@@ -59,7 +36,6 @@ public interface QueryByExampleFragment<T> {
 	 * @param example must not be {@literal null}.
 	 * @return all entities matching the given {@link Example}.
 	 */
-	@Transactional(value = TxType.REQUIRED)
 	<S extends T> Iterable<S> findAll(Example<S> example);
 
 	/**
@@ -71,7 +47,6 @@ public interface QueryByExampleFragment<T> {
 	 * @return all entities matching the given {@link Example}.
 	 * @since 1.10
 	 */
-	@Transactional(value = TxType.REQUIRED)
 	<S extends T> Iterable<S> findAll(Example<S> example, Sort sort);
 
 	/**
@@ -82,7 +57,6 @@ public interface QueryByExampleFragment<T> {
 	 * @param pageable can be {@literal null}.
 	 * @return a {@link Page} of entities matching the given {@link Example}.
 	 */
-	@Transactional(value = TxType.REQUIRED)
 	<S extends T> Page<S> findAll(Example<S> example, Pageable pageable);
 
 	/**
@@ -91,7 +65,6 @@ public interface QueryByExampleFragment<T> {
 	 * @param example the {@link Example} to count instances for. Must not be {@literal null}.
 	 * @return the number of instances matching the {@link Example}.
 	 */
-	@Transactional(value = TxType.REQUIRED)
 	<S extends T> long count(Example<S> example);
 
 	/**
@@ -100,6 +73,5 @@ public interface QueryByExampleFragment<T> {
 	 * @param example the {@link Example} to use for the existence check. Must not be {@literal null}.
 	 * @return {@literal true} if the data store contains elements that match the given {@link Example}.
 	 */
-	@Transactional(value = TxType.REQUIRED)
 	<S extends T> boolean exists(Example<S> example);
 }

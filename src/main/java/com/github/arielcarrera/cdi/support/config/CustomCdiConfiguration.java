@@ -7,8 +7,6 @@ import java.util.Optional;
 import org.springframework.data.repository.cdi.CdiRepositoryConfiguration;
 import org.springframework.data.repository.core.support.RepositoryProxyPostProcessor;
 
-import com.github.arielcarrera.cdi.support.base.CustomSimpleJpaRepository;
-
 public class CustomCdiConfiguration implements CdiRepositoryConfiguration {
 
 	@Override
@@ -16,10 +14,10 @@ public class CustomCdiConfiguration implements CdiRepositoryConfiguration {
 		return "Impl";
 	}
 	
-	@Override
-	public Optional<Class<?>> getRepositoryBeanClass() {
-		return Optional.of(CustomSimpleJpaRepository.class);
-	}
+//	@Override
+//	public Optional<Class<?>> getRepositoryBeanClass() {
+//		return Optional.of(CustomSimpleJpaRepository.class);
+//	}
 
 
 	@Override

@@ -52,6 +52,7 @@ public class TransactionalConnectionProvider implements ConnectionProvider {
         Properties properties = new Properties();
         properties.setProperty(TransactionalDriver.userName, USERNAME);
         properties.setProperty(TransactionalDriver.password, PASSWORD);
+        properties.setProperty(TransactionalDriver.maxConnections, "20");
         return transactionalDriver.connect("jdbc:arjuna:" + DATASOURCE_JNDI, properties);
     }
 

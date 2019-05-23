@@ -22,14 +22,10 @@
 
 package com.github.arielcarrera.cdi.support.transactional;
 
-
 import static java.security.AccessController.doPrivileged;
 
 import java.io.Serializable;
-import java.lang.annotation.Annotation;
 import java.security.PrivilegedAction;
-import java.util.HashSet;
-import java.util.Set;
 
 import javax.enterprise.inject.spi.BeanManager;
 import javax.interceptor.InvocationContext;
@@ -46,180 +42,162 @@ import com.arjuna.ats.jta.logging.jtaLogger;
 
 /**
  * Based on {@link TransactionalInterceptorBase}
+ * 
  * @author Ariel Carrera <carreraariel@gmail.com>
- *
  */
 public abstract class MyTransactionalInterceptorBase implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-    transient javax.enterprise.inject.spi.BeanManager beanManager;
+	transient javax.enterprise.inject.spi.BeanManager beanManager;
 
-    protected TransactionManager transactionManager;
+	protected TransactionManager transactionManager;
 
-    protected final boolean userTransactionAvailable;
+	protected final boolean userTransactionAvailable;
 
-    protected MyTransactionalInterceptorBase(boolean userTransactionAvailable, BeanManager beanManager, TransactionManager transactionManager) {
-        this.userTransactionAvailable = userTransactionAvailable;
-        this.beanManager = beanManager;
-        this.transactionManager = transactionManager;
-    }
+	protected MyTransactionalInterceptorBase(boolean userTransactionAvailable, BeanManager beanManager,
+			TransactionManager transactionManager) {
+		this.userTransactionAvailable = userTransactionAvailable;
+		this.beanManager = beanManager;
+		this.transactionManager = transactionManager;
+	}
 
-    public Object intercept(InvocationContext ic) throws Exception {
+	public Object intercept(InvocationContext ic) throws Exception {
 
-        final Transaction tx = transactionManager.getTransaction();
+		final Transaction tx = transactionManager.getTransaction();
 
-        boolean previousUserTransactionAvailability = setUserTransactionAvailable(userTransactionAvailable);
-        try {
-            return doIntercept(transactionManager, tx, ic);
-        } finally {
-            resetUserTransactionAvailability(previousUserTransactionAvailability);
-        }
-    }
+		boolean previousUserTransactionAvailability = setUserTransactionAvailable(userTransactionAvailable);
+		try {
+			return doIntercept(transactionManager, tx, ic);
+		} finally {
+			resetUserTransactionAvailability(previousUserTransactionAvailability);
+		}
+	}
 
-    protected abstract Object doIntercept(TransactionManager tm, Transaction tx, InvocationContext ic) throws Exception;
+	protected abstract Object doIntercept(TransactionManager tm, Transaction tx, InvocationContext ic) throws Exception;
 
-    /**
-     * <p>
-     * Looking for the {@link Transactional} annotation first on the method, second on the class.
-     * <p>
-     * Method handles CDI types to cover cases where extensions are used.
-     * In case of EE container uses reflection.
-     *
-     * @param ic  invocation context of the interceptor
-     * @return instance of {@link Transactional} annotation or null
-     */
-    private Transactional getTransactional(InvocationContext ic) {
-        Transactional transactional = ic.getMethod().getAnnotation(Transactional.class);
-        if (transactional != null) {
-            return transactional;
-        }
+	/**
+	 * <p>
+	 * Looking for the {@link Transactional} annotation first on the method, second on the class.
+	 * <p>
+	 * Method handles CDI types to cover cases where extensions are used. In case of EE container uses reflection.
+	 *
+	 * @param ic invocation context of the interceptor
+	 * @return instance of {@link Transactional} annotation or null
+	 */
+	private Transactional getTransactional(InvocationContext ic) {
+		Transactional transactional = (Transactional) ic.getContextData().get(Transactional.class.getName());
+		if (transactional != null) {
+			return transactional;
+		}
 
-        Class<?> targetClass = ic.getTarget().getClass();
-        transactional = targetClass.getAnnotation(Transactional.class);
-        if (transactional != null) {
-            return transactional;
-        }
+		transactional = ic.getMethod().getAnnotation(Transactional.class);
+		if (transactional != null) {
+			return transactional;
+		}
 
-        throw new RuntimeException(jtaLogger.i18NLogger.get_expected_transactional_annotation());
-    }
+		Class<?> targetClass = ic.getTarget().getClass();
+		transactional = targetClass.getAnnotation(Transactional.class);
+		if (transactional != null) {
+			return transactional;
+		}
 
-    private Transactional getTransactionalAnnotationRecursive(Annotation... annotationsOnMember) {
-        if(annotationsOnMember == null) return null;
-        Set<Class<? extends Annotation>> stereotypeAnnotations = new HashSet<>();
+		throw new RuntimeException(jtaLogger.i18NLogger.get_expected_transactional_annotation());
+	}
 
-        for(Annotation annotation: annotationsOnMember) {
-            if(annotation.annotationType().equals(Transactional.class)) {
-                return (Transactional) annotation;
-            }
-            if (beanManager.isStereotype(annotation.annotationType())) {
-                stereotypeAnnotations.add(annotation.annotationType());
-            }
-        }
-        for(Class<? extends Annotation> stereotypeAnnotation: stereotypeAnnotations) {
-            return getTransactionalAnnotationRecursive(beanManager.getStereotypeDefinition(stereotypeAnnotation));
-        }
-        return null;
-    }
+	protected Object invokeInOurTx(InvocationContext ic, TransactionManager tm) throws Exception {
 
-    private Transactional getTransactionalAnnotationRecursive(Set<Annotation> annotationsOnMember) {
-        return getTransactionalAnnotationRecursive(
-            annotationsOnMember.toArray(new Annotation[annotationsOnMember.size()]));
-    }
+		tm.begin();
+		Transaction tx = tm.getTransaction();
 
-    protected Object invokeInOurTx(InvocationContext ic, TransactionManager tm) throws Exception {
+		try {
+			return ic.proceed();
+		} catch (Exception e) {
+			handleException(ic, e, tx);
+		} finally {
+			endTransaction(tm, tx);
+		}
+		throw new RuntimeException("UNREACHABLE");
+	}
 
-        tm.begin();
-        Transaction tx = tm.getTransaction();
+	protected Object invokeInCallerTx(InvocationContext ic, Transaction tx) throws Exception {
 
-        try {
-            return ic.proceed();
-        } catch (Exception e) {
-            handleException(ic, e, tx);
-        } finally {
-            endTransaction(tm, tx);
-        }
-        throw new RuntimeException("UNREACHABLE");
-    }
+		try {
+			return ic.proceed();
+		} catch (Exception e) {
+			handleException(ic, e, tx);
+		}
+		throw new RuntimeException("UNREACHABLE");
+	}
 
-    protected Object invokeInCallerTx(InvocationContext ic, Transaction tx) throws Exception {
+	protected Object invokeInNoTx(InvocationContext ic) throws Exception {
 
-        try {
-            return ic.proceed();
-        } catch (Exception e) {
-            handleException(ic, e, tx);
-        }
-        throw new RuntimeException("UNREACHABLE");
-    }
+		return ic.proceed();
+	}
 
-    protected Object invokeInNoTx(InvocationContext ic) throws Exception {
+	protected void handleException(InvocationContext ic, Exception e, Transaction tx) throws Exception {
 
-        return ic.proceed();
-    }
+		Transactional transactional = getTransactional(ic);
 
-    protected void handleException(InvocationContext ic, Exception e, Transaction tx) throws Exception {
+		for (Class<?> dontRollbackOnClass : transactional.dontRollbackOn()) {
+			if (dontRollbackOnClass.isAssignableFrom(e.getClass())) {
+				throw e;
+			}
+		}
 
-        Transactional transactional = getTransactional(ic);
+		for (Class<?> rollbackOnClass : transactional.rollbackOn()) {
+			if (rollbackOnClass.isAssignableFrom(e.getClass())) {
+				tx.setRollbackOnly();
+				throw e;
+			}
+		}
 
-        for (Class<?> dontRollbackOnClass : transactional.dontRollbackOn()) {
-            if (dontRollbackOnClass.isAssignableFrom(e.getClass())) {
-                throw e;
-            }
-        }
+		if (e instanceof RuntimeException) {
+			tx.setRollbackOnly();
+			throw e;
+		}
 
-        for (Class<?> rollbackOnClass : transactional.rollbackOn()) {
-            if (rollbackOnClass.isAssignableFrom(e.getClass())) {
-                tx.setRollbackOnly();
-                throw e;
-            }
-        }
+		throw e;
+	}
 
-        if (e instanceof RuntimeException) {
-            tx.setRollbackOnly();
-            throw e;
-        }
+	protected void endTransaction(TransactionManager tm, Transaction tx) throws Exception {
 
-        throw e;
-    }
+		if (tx != tm.getTransaction()) {
+			throw new RuntimeException(jtaLogger.i18NLogger.get_wrong_tx_on_thread());
+		}
 
-    protected void endTransaction(TransactionManager tm, Transaction tx) throws Exception {
+		if (tx.getStatus() == Status.STATUS_MARKED_ROLLBACK) {
+			tm.rollback();
+		} else {
+			tm.commit();
+		}
+	}
 
-        if (tx != tm.getTransaction()) {
-            throw new RuntimeException(jtaLogger.i18NLogger.get_wrong_tx_on_thread());
-        }
+	protected boolean setUserTransactionAvailable(boolean available) {
 
-        if (tx.getStatus() == Status.STATUS_MARKED_ROLLBACK) {
-            tm.rollback();
-        } else {
-            tm.commit();
-        }
-    }
+		UserTransactionOperationsProvider userTransactionProvider = jtaPropertyManager.getJTAEnvironmentBean()
+				.getUserTransactionOperationsProvider();
+		boolean previousUserTransactionAvailability = userTransactionProvider.getAvailability();
 
-    protected boolean setUserTransactionAvailable(boolean available) {
+		setAvailability(userTransactionProvider, available);
 
-        UserTransactionOperationsProvider userTransactionProvider =
-            jtaPropertyManager.getJTAEnvironmentBean().getUserTransactionOperationsProvider();
-        boolean previousUserTransactionAvailability = userTransactionProvider.getAvailability();
+		return previousUserTransactionAvailability;
+	}
 
-        setAvailability(userTransactionProvider, available);
+	protected void resetUserTransactionAvailability(boolean previousUserTransactionAvailability) {
+		UserTransactionOperationsProvider userTransactionProvider = jtaPropertyManager.getJTAEnvironmentBean()
+				.getUserTransactionOperationsProvider();
+		setAvailability(userTransactionProvider, previousUserTransactionAvailability);
+	}
 
-        return previousUserTransactionAvailability;
-    }
-
-    protected void resetUserTransactionAvailability(boolean previousUserTransactionAvailability) {
-        UserTransactionOperationsProvider userTransactionProvider =
-            jtaPropertyManager.getJTAEnvironmentBean().getUserTransactionOperationsProvider();
-        setAvailability(userTransactionProvider, previousUserTransactionAvailability);
-    }
-
-    private void setAvailability(UserTransactionOperationsProvider userTransactionProvider, boolean available) {
-        if (System.getSecurityManager() == null) {
-            userTransactionProvider.setAvailability(available);
-        } else {
-            doPrivileged((PrivilegedAction<Object>) () -> {
-                userTransactionProvider.setAvailability(available);
-                return null;
-            });
-        }
-    }
+	private void setAvailability(UserTransactionOperationsProvider userTransactionProvider, boolean available) {
+		if (System.getSecurityManager() == null) {
+			userTransactionProvider.setAvailability(available);
+		} else {
+			doPrivileged((PrivilegedAction<Object>) () -> {
+				userTransactionProvider.setAvailability(available);
+				return null;
+			});
+		}
+	}
 }

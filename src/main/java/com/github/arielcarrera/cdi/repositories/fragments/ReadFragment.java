@@ -22,6 +22,7 @@ import com.github.arielcarrera.cdi.repositories.helpers.CustomJpaRepository;
  * @param <T> Type of the entity
  * @param <ID> Entity's PK
  */
+@Transactional(TxType.REQUIRED)
 public interface ReadFragment<T, ID extends Serializable> extends QueryByExampleFragment<T>, CustomJpaRepository {
 
 	/**
@@ -31,7 +32,6 @@ public interface ReadFragment<T, ID extends Serializable> extends QueryByExample
 	 * @return the entity with the given id or {@literal Optional#empty()} if none found
 	 * @throws IllegalArgumentException if {@code id} is {@literal null}.
 	 */
-	@Transactional(value = TxType.REQUIRED)
 	Optional<T> findById(ID id);
 
 	/**
@@ -41,7 +41,6 @@ public interface ReadFragment<T, ID extends Serializable> extends QueryByExample
 	 * @return {@literal true} if an entity with the given id exists, {@literal false} otherwise.
 	 * @throws IllegalArgumentException if {@code id} is {@literal null}.
 	 */
-	@Transactional(value = TxType.REQUIRED)
 	boolean existsById(ID id);
 
 	/**
@@ -49,7 +48,6 @@ public interface ReadFragment<T, ID extends Serializable> extends QueryByExample
 	 *
 	 * @return all entities
 	 */
-	@Transactional(value = TxType.REQUIRED)
 	List<T> findAll();
 	
 	/**
@@ -57,7 +55,6 @@ public interface ReadFragment<T, ID extends Serializable> extends QueryByExample
 	 * @param sort
 	 * @return all entities roted
 	 */
-	@Transactional(value = TxType.REQUIRED)
 	List<T> findAll(Sort sort);
 	
 	/**
@@ -66,7 +63,6 @@ public interface ReadFragment<T, ID extends Serializable> extends QueryByExample
 	 * @param pageable
 	 * @return a page of entities
 	 */
-	@Transactional(value = TxType.REQUIRED)
 	Page<T> findAll(Pageable pageable);
 
 	/**
@@ -75,7 +71,6 @@ public interface ReadFragment<T, ID extends Serializable> extends QueryByExample
 	 * @param ids
 	 * @return
 	 */
-	@Transactional(value = TxType.REQUIRED)
 	List<T> findAllById(Iterable<ID> ids);
 	
 	/**
@@ -83,7 +78,6 @@ public interface ReadFragment<T, ID extends Serializable> extends QueryByExample
 	 *
 	 * @return the number of entities
 	 */
-	@Transactional(value = TxType.REQUIRED)
 	long count();
 	
 	/**
@@ -96,14 +90,12 @@ public interface ReadFragment<T, ID extends Serializable> extends QueryByExample
 	 * @return a reference to the entity with the given identifier.
 	 * @see EntityManager#getReference(Class, Object) for details on when an exception is thrown.
 	 */
-	@Transactional(value = TxType.REQUIRED)
 	T getOne(ID id);
 	
 	/*
 	 * (non-Javadoc)
 	 * @see org.springframework.data.repository.query.QueryByExampleExecutor#findAll(org.springframework.data.domain.Example)
 	 */
-	@Transactional(value = TxType.REQUIRED)
 	@Override
 	<S extends T> List<S> findAll(Example<S> example);
 	
@@ -111,7 +103,6 @@ public interface ReadFragment<T, ID extends Serializable> extends QueryByExample
 	 * (non-Javadoc)
 	 * @see org.springframework.data.repository.query.QueryByExampleExecutor#findAll(org.springframework.data.domain.Example, org.springframework.data.domain.Sort)
 	 */
-	@Transactional(value = TxType.REQUIRED)
 	@Override
 	<S extends T> List<S> findAll(Example<S> example, Sort sort);
 }
