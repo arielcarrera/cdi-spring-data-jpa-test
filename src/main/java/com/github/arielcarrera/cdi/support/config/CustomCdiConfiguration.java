@@ -21,7 +21,7 @@ public class CustomCdiConfiguration implements CdiRepositoryConfiguration {
 
 	@Override
 	public List<RepositoryProxyPostProcessor> getRepositoryProxyPostProcessors() {
-		return Arrays.asList(new DataAccessExceptionMapperPostProcessor(), new CustomTransactionalPostProcessor());
+		return Arrays.asList(new DataExceptionMapperPostProcessor(), new CustomTransactionalPostProcessor());
 	}
 	
 }

@@ -3,13 +3,19 @@ package com.github.arielcarrera.cdi.support.transactional;
 import javax.enterprise.util.AnnotationLiteral;
 import javax.transaction.Transactional;
 
+/**
+ * Literal instance of Transactional annotation
+ * 
+ * @author Ariel Carrera <carreraariel@gmail.com>
+ *
+ */
 @SuppressWarnings("all")
 public class TransactionalLiteral extends AnnotationLiteral<Transactional> implements Transactional {
 
-    private TransactionalLiteral() {
-    }
+	private TransactionalLiteral() {
+	}
 
-    public static final TransactionalLiteral INSTANCE = new TransactionalLiteral();
+	public static final TransactionalLiteral INSTANCE = new TransactionalLiteral();
 
 	@Override
 	public TxType value() {
@@ -18,13 +24,11 @@ public class TransactionalLiteral extends AnnotationLiteral<Transactional> imple
 
 	@Override
 	public Class[] rollbackOn() {
-		// TODO Auto-generated method stub
-		return new Class[] {RuntimeException.class};
+		return new Class[] { RuntimeException.class };
 	}
 
 	@Override
 	public Class[] dontRollbackOn() {
-		// TODO Auto-generated method stub
 		return new Class[] {};
 	}
 }

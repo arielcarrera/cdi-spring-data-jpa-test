@@ -18,9 +18,9 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.NonUniqueResultException;
 
-import org.hibernate.demos.jpacditesting.support.JtaEnvironment;
 import org.jboss.weld.environment.se.Weld;
 import org.jboss.weld.junit4.WeldInitiator;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
@@ -38,8 +38,12 @@ import org.springframework.data.domain.Sort.Direction;
 import com.github.arielcarrera.cdi.entities.LogicalDeletion;
 import com.github.arielcarrera.cdi.exceptions.DataAccessException;
 import com.github.arielcarrera.cdi.repositories.ReadOnlyRepository;
+import com.github.arielcarrera.cdi.test.config.AgroalConnectionProvider;
+import com.github.arielcarrera.cdi.test.config.JtaEnvironment;
 import com.github.arielcarrera.cdi.test.entities.TestEntity;
 import com.github.arielcarrera.cdi.test.repositories.TestReadWriteDeleteRepository;
+
+import io.agroal.api.AgroalDataSourceMetrics;
 
 public abstract class AbstractReadOnlyRepositoryTest {
 
@@ -48,18 +52,46 @@ public abstract class AbstractReadOnlyRepositoryTest {
 	@Rule
 	public WeldInitiator weld = WeldInitiator.from(new Weld()).activate(RequestScoped.class, ApplicationScoped.class)
 				.inject(this).build();
+	
 	@Rule
 	public TestRule watcher = new TestWatcher() {
 	   protected void starting(Description description) {
 	      System.out.println("Starting TEST: " + description.getMethodName());
+	      lastMethod = currentMethod;
+	      currentMethod = description.getMethodName();
 	   }
 	};
+	
+	private static String lastMethod = "-";
+	private static String currentMethod = "-";
 	
 	@Inject
 	protected EntityManager entityManager;
 
 	@Inject
 	protected TestReadWriteDeleteRepository loaderRepository;
+	
+	@Before
+	public void statusPoolBegin() {
+    	AgroalDataSourceMetrics metrics = AgroalConnectionProvider.getMetrics();
+    	if (metrics != null) {
+	    	System.out.println("Metricas del pool INICIO " + currentMethod + ":" + metrics);
+	    	if (metrics.maxUsedCount() > 1) {
+	    		System.out.println("Alerta: max=" + metrics.maxUsedCount() + " -> metodo: " + currentMethod + " -> previo: " +  lastMethod);
+	    	}
+    	}
+	}
+	
+	@After
+	public void statusPoolEnd() {
+  	AgroalDataSourceMetrics metrics = AgroalConnectionProvider.getMetrics();
+  	if (metrics != null) {
+    	System.out.println("Metricas del pool FIN " + currentMethod + ":" + metrics);
+	    if (metrics.maxUsedCount() > 1) {
+    		System.out.println("Alerta: max=" + metrics.maxUsedCount() + " -> metodo: " + currentMethod + " -> previo: " +  lastMethod);
+	  	}
+    }
+	}
 	
 	public AbstractReadOnlyRepositoryTest() {
 		super();

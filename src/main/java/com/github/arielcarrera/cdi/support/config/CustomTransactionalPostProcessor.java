@@ -23,17 +23,18 @@ import org.springframework.data.repository.core.support.RepositoryProxyPostProce
 import org.springframework.lang.Nullable;
 import org.springframework.transaction.interceptor.TransactionAttributeSource;
 
-import com.github.arielcarrera.cdi.support.transactional.MyTransactionalInterceptorBase;
-import com.github.arielcarrera.cdi.support.transactional.MyTransactionalInterceptorMandatory;
-import com.github.arielcarrera.cdi.support.transactional.MyTransactionalInterceptorNever;
-import com.github.arielcarrera.cdi.support.transactional.MyTransactionalInterceptorNotSupported;
-import com.github.arielcarrera.cdi.support.transactional.MyTransactionalInterceptorRequired;
-import com.github.arielcarrera.cdi.support.transactional.MyTransactionalInterceptorRequiresNew;
-import com.github.arielcarrera.cdi.support.transactional.MyTransactionalInterceptorSupports;
+import com.github.arielcarrera.cdi.support.transactional.CustomTransactionalInterceptorBase;
+import com.github.arielcarrera.cdi.support.transactional.CustomTransactionalInterceptorMandatory;
+import com.github.arielcarrera.cdi.support.transactional.CustomTransactionalInterceptorNever;
+import com.github.arielcarrera.cdi.support.transactional.CustomTransactionalInterceptorNotSupported;
+import com.github.arielcarrera.cdi.support.transactional.CustomTransactionalInterceptorRequired;
+import com.github.arielcarrera.cdi.support.transactional.CustomTransactionalInterceptorRequiresNew;
+import com.github.arielcarrera.cdi.support.transactional.CustomTransactionalInterceptorSupports;
 
 /**
- * {@link RepositoryProxyPostProcessor} that sets up interceptors to do transactional management
-
+ * {@link RepositoryProxyPostProcessor} that sets up interceptors to do
+ * transactional management
+ * 
  * @author Ariel Carrera
  *
  */
@@ -41,13 +42,17 @@ public class CustomTransactionalPostProcessor implements RepositoryProxyPostProc
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.springframework.data.repository.core.support.RepositoryProxyPostProcessor#postProcess(org.springframework.aop.framework.ProxyFactory, org.springframework.data.repository.core.RepositoryInformation)
+	 * 
+	 * @see
+	 * org.springframework.data.repository.core.support.RepositoryProxyPostProcessor
+	 * #postProcess(org.springframework.aop.framework.ProxyFactory,
+	 * org.springframework.data.repository.core.RepositoryInformation)
 	 */
 	@Override
 	public void postProcess(ProxyFactory factory, RepositoryInformation repositoryInformation) {
 		factory.addAdvice(new MyTransactionInterceptor());
 	}
-	
+
 	/**
 	 * @author Ariel Carrera <carreraariel@gmail.com>
 	 */
@@ -74,7 +79,7 @@ public class CustomTransactionalPostProcessor implements RepositoryProxyPostProc
 		public Object invoke(MethodInvocation invocation) throws Throwable {
 			String methodStr = invocation.getMethod().toString();
 			Optional<Transactional> optional = cache.get(methodStr);
-			if (optional == null) { //value never processed
+			if (optional == null) { // value never processed
 				Transactional txAnn = invocation.getMethod().getAnnotation(Transactional.class);
 				// If there is no method annotation it will search at Class/Interface level
 				if (txAnn == null) {
@@ -83,47 +88,48 @@ public class CustomTransactionalPostProcessor implements RepositoryProxyPostProc
 				optional = Optional.ofNullable(txAnn);
 				cache.put(methodStr, optional);
 			}
-			
+
 			if (optional.isPresent()) {
-				//value processed / cached -> with annotation
-				MyTransactionalInterceptorBase txInterceptor = (MyTransactionalInterceptorBase) CDI.current()
+				// value processed / cached -> with annotation
+				CustomTransactionalInterceptorBase txInterceptor = (CustomTransactionalInterceptorBase) CDI.current()
 						.select(getInterceptorClass(optional.get()), Default.Literal.INSTANCE).get();
 				return txInterceptor.intercept(createMethodInvocation(invocation, optional.get()));
 			}
-			
-			//else value processed / cached -> No annotation
+
+			// else value processed / cached -> No annotation
 			return invocation.proceed();
 		}
 
 		/**
 		 * Get Interceptor implementation by TxType of Transactional annotation
+		 * 
 		 * @param txAnn
 		 * @return Class of the interceptor
 		 */
 		private Class<?> getInterceptorClass(Transactional txAnn) {
 			Class<?> txInterceptorClass = null;
 			switch (txAnn.value()) {
-				case REQUIRED:
-					txInterceptorClass = MyTransactionalInterceptorRequired.class;
-					break;
-				case REQUIRES_NEW:
-					txInterceptorClass = MyTransactionalInterceptorRequiresNew.class;
-					break;
-				case MANDATORY:
-					txInterceptorClass = MyTransactionalInterceptorMandatory.class;
-					break;
-				case SUPPORTS:
-					txInterceptorClass = MyTransactionalInterceptorSupports.class;
-					break;
-				case NOT_SUPPORTED:
-					txInterceptorClass = MyTransactionalInterceptorNotSupported.class;
-					break;
-				case NEVER:
-					txInterceptorClass = MyTransactionalInterceptorNever.class;
-					break;
-				default:
-					txInterceptorClass = MyTransactionalInterceptorRequired.class;
-					break;
+			case REQUIRED:
+				txInterceptorClass = CustomTransactionalInterceptorRequired.class;
+				break;
+			case REQUIRES_NEW:
+				txInterceptorClass = CustomTransactionalInterceptorRequiresNew.class;
+				break;
+			case MANDATORY:
+				txInterceptorClass = CustomTransactionalInterceptorMandatory.class;
+				break;
+			case SUPPORTS:
+				txInterceptorClass = CustomTransactionalInterceptorSupports.class;
+				break;
+			case NOT_SUPPORTED:
+				txInterceptorClass = CustomTransactionalInterceptorNotSupported.class;
+				break;
+			case NEVER:
+				txInterceptorClass = CustomTransactionalInterceptorNever.class;
+				break;
+			default:
+				txInterceptorClass = CustomTransactionalInterceptorRequired.class;
+				break;
 			}
 			return txInterceptorClass;
 		}

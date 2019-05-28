@@ -12,9 +12,10 @@ import javax.transaction.InvalidTransactionException;
 import javax.transaction.TransactionRequiredException;
 
 import org.hamcrest.core.IsInstanceOf;
-import org.hibernate.demos.jpacditesting.support.JtaEnvironment;
 import org.jboss.weld.environment.se.Weld;
 import org.jboss.weld.junit4.WeldInitiator;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
@@ -24,9 +25,13 @@ import org.junit.rules.TestWatcher;
 import org.junit.runner.Description;
 
 import com.github.arielcarrera.cdi.entities.LogicalDeletion;
+import com.github.arielcarrera.cdi.test.config.AgroalConnectionProvider;
+import com.github.arielcarrera.cdi.test.config.JtaEnvironment;
 import com.github.arielcarrera.cdi.test.entities.TestEntity;
 import com.github.arielcarrera.cdi.test.repositories.TestReadOnlyRepository;
 import com.github.arielcarrera.cdi.test.services.DefaultTransactionalTestService;
+
+import io.agroal.api.AgroalDataSourceMetrics;
 
 /**
  * Tests for Writable Repository with soft delete operations
@@ -50,8 +55,13 @@ public class DefaultTransactionAnnotationTest {
 	public TestRule watcher = new TestWatcher() {
 	   protected void starting(Description description) {
 	      System.out.println("Starting TEST: " + description.getMethodName());
+	      lastMethod = currentMethod;
+	      currentMethod = description.getMethodName();
 	   }
 	};
+	
+	private static String lastMethod = "-";
+	private static String currentMethod = "-";
 	
 	@Inject
 	protected EntityManager entityManager;
@@ -66,6 +76,28 @@ public class DefaultTransactionAnnotationTest {
 	@Inject
 	private TestReadOnlyRepository repo;
 	
+	
+	@Before
+	public void statusPoolBegin() {
+    	AgroalDataSourceMetrics metrics = AgroalConnectionProvider.getMetrics();
+    	if (metrics != null) {
+	    	System.out.println("Metricas del pool INICIO " + currentMethod + ":" + metrics);
+	    	if (metrics.maxUsedCount() > 1) {
+	    		System.out.println("Alerta: max=" + metrics.maxUsedCount() + " -> metodo: " + currentMethod + " -> previo: " +  lastMethod);
+	    	}
+    	}
+	}
+	
+	@After
+	public void statusPoolEnd() {
+  	AgroalDataSourceMetrics metrics = AgroalConnectionProvider.getMetrics();
+  	if (metrics != null) {
+    	System.out.println("Metricas del pool FIN " + currentMethod + ":" + metrics);
+	    if (metrics.maxUsedCount() > 1) {
+    		System.out.println("Alerta: max=" + metrics.maxUsedCount() + " -> metodo: " + currentMethod + " -> previo: " +  lastMethod);
+	  	}
+    }
+	}
 	
 	@Test
 	public void transactionalService_OK() {
