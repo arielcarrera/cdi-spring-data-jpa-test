@@ -1,1 +1,1 @@
-org.hibernate.demos.jpacditesting.support.TestingTransactionServices
+com.github.arielcarrera.cdi.test.config.TestingTransactionServices

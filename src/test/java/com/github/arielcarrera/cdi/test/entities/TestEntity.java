@@ -16,7 +16,7 @@ public class TestEntity extends LogicalDeletion implements Identifiable<Integer>
 	private Integer value;
 	
 	@Column(nullable=true,unique=true)
-	public Integer uniqueValue;
+	private Integer uniqueValue;
 
 	public TestEntity() {
 		super();
