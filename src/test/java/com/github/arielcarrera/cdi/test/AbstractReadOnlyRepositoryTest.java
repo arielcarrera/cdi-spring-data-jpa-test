@@ -218,19 +218,32 @@ public abstract class AbstractReadOnlyRepositoryTest {
 
 	@Test
 	public void getOne_OK() {
+		//this method must to be called inside a transaction or it will cause a Connection leak because connection.Close() is never called  
+		entityManager.getTransaction().begin();
 		TestEntity p = getTestRepository().getOne(1);
 		assertNotNull(p);
 		assertTrue(p.getValue().equals(101));
+		entityManager.getTransaction().commit();
 	}
-
+	
 	@Test(expected=EntityNotFoundException.class)
 	public void getOne_NotFound() {
-		TestEntity p = getTestRepository().getOne(-1);
-		if (p != null) {
-			assertNull(p.getValue()); //hibernate must throw an EntityNotFoundException
-		} else {
-			assertNull(p);
-		}		
+		try {
+			//this method must to be called inside a transaction or it will cause a Connection leak because connection.Close() is never called  
+			entityManager.getTransaction().begin();
+			TestEntity p = getTestRepository().getOne(-1);
+			if (p != null) {
+				assertNull(p.getValue()); //hibernate must throw an EntityNotFoundException
+			} else {
+				assertNull(p);
+			}
+			entityManager.getTransaction().commit();
+		} catch(Exception e) {
+			if (entityManager.getTransaction().isActive()) {
+				entityManager.getTransaction().rollback();
+			}
+			throw e;
+		}
 	}
 
 	@Test

@@ -39,7 +39,7 @@ public class ReadWriteSoftDeleteRepositoryTest extends AbstractReadOnlySoftDelet
 		getTestRepository().deleteById(1);
 		getEntityManager().clear();
 
-		assertTrue(getTestRepository().getOne(1).getStatus() == LogicalDeletion.DELETED_STATUS);
+		assertTrue(getTestRepository().findById(1).get().getStatus() == LogicalDeletion.DELETED_STATUS);
 	}
 
 	@Test(expected = DataAccessException.class)
@@ -69,7 +69,7 @@ public class ReadWriteSoftDeleteRepositoryTest extends AbstractReadOnlySoftDelet
 		getTestRepository().delete(getTestRepository().getOne(1));
 		getEntityManager().clear();
 
-		assertTrue(getTestRepository().getOne(1).getStatus() == LogicalDeletion.DELETED_STATUS);
+		assertTrue(getTestRepository().findById(1).get().getStatus() == LogicalDeletion.DELETED_STATUS);
 	}
 
 	@Test
@@ -77,7 +77,7 @@ public class ReadWriteSoftDeleteRepositoryTest extends AbstractReadOnlySoftDelet
 		getTestRepository().delete(new TestEntity(1, null));
 		getEntityManager().clear();
 
-		assertTrue(getTestRepository().getOne(1).getStatus() == LogicalDeletion.DELETED_STATUS);
+		assertTrue(getTestRepository().findById(1).get().getStatus() == LogicalDeletion.DELETED_STATUS);
 	}
 
 	@Test
@@ -85,7 +85,7 @@ public class ReadWriteSoftDeleteRepositoryTest extends AbstractReadOnlySoftDelet
 		getTestRepository().delete(new TestEntity(1, 1));
 		getEntityManager().clear();
 
-		assertTrue(getTestRepository().getOne(1).getStatus() == LogicalDeletion.DELETED_STATUS);
+		assertTrue(getTestRepository().findById(1).get().getStatus() == LogicalDeletion.DELETED_STATUS);
 	}
 
 	/**
@@ -99,7 +99,7 @@ public class ReadWriteSoftDeleteRepositoryTest extends AbstractReadOnlySoftDelet
 		getTestRepository().delete(new TestEntity(100, null));
 		getEntityManager().clear();
 		//it will do insert and update (With default repository implementation)
-		assertTrue(getTestRepository().getOne(100).getStatus() == LogicalDeletion.DELETED_STATUS);
+		assertTrue(getTestRepository().findById(100).get().getStatus() == LogicalDeletion.DELETED_STATUS);
 	}
 
 	@Test(expected = DataAccessException.class)
@@ -122,10 +122,10 @@ public class ReadWriteSoftDeleteRepositoryTest extends AbstractReadOnlySoftDelet
 		getTestRepository().deleteAll(entities);
 		getEntityManager().clear();
 
-		assertTrue(getTestRepository().getOne(1).getStatus() == LogicalDeletion.DELETED_STATUS);
-		assertTrue(getTestRepository().getOne(2).getStatus() == LogicalDeletion.DELETED_STATUS);
-		assertTrue(getTestRepository().getOne(3).getStatus() == LogicalDeletion.DELETED_STATUS);
-		assertTrue(getTestRepository().getOne(4).getStatus() == LogicalDeletion.NORMAL_STATUS);
+		assertTrue(getTestRepository().findById(1).get().getStatus() == LogicalDeletion.DELETED_STATUS);
+		assertTrue(getTestRepository().findById(2).get().getStatus() == LogicalDeletion.DELETED_STATUS);
+		assertTrue(getTestRepository().findById(3).get().getStatus() == LogicalDeletion.DELETED_STATUS);
+		assertTrue(getTestRepository().findById(4).get().getStatus() == LogicalDeletion.NORMAL_STATUS);
 	}
 
 	@Test
@@ -137,10 +137,10 @@ public class ReadWriteSoftDeleteRepositoryTest extends AbstractReadOnlySoftDelet
 		getTestRepository().deleteAll(entities);
 		getEntityManager().clear();
 
-		assertTrue(getTestRepository().getOne(1).getStatus() == LogicalDeletion.DELETED_STATUS);
-		assertTrue(getTestRepository().getOne(2).getStatus() == LogicalDeletion.DELETED_STATUS);
-		assertTrue(getTestRepository().getOne(3).getStatus() == LogicalDeletion.DELETED_STATUS);
-		assertTrue(getTestRepository().getOne(4).getStatus() == LogicalDeletion.NORMAL_STATUS);
+		assertTrue(getTestRepository().findById(1).get().getStatus() == LogicalDeletion.DELETED_STATUS);
+		assertTrue(getTestRepository().findById(2).get().getStatus() == LogicalDeletion.DELETED_STATUS);
+		assertTrue(getTestRepository().findById(3).get().getStatus() == LogicalDeletion.DELETED_STATUS);
+		assertTrue(getTestRepository().findById(4).get().getStatus() == LogicalDeletion.NORMAL_STATUS);
 	}
 
 	@Test
@@ -152,10 +152,10 @@ public class ReadWriteSoftDeleteRepositoryTest extends AbstractReadOnlySoftDelet
 		getTestRepository().deleteAll(entities);
 		getEntityManager().clear();
 
-		assertTrue(getTestRepository().getOne(1).getStatus() == LogicalDeletion.DELETED_STATUS);
-		assertTrue(getTestRepository().getOne(2).getStatus() == LogicalDeletion.DELETED_STATUS);
-		assertTrue(getTestRepository().getOne(3).getStatus() == LogicalDeletion.DELETED_STATUS);
-		assertTrue(getTestRepository().getOne(4).getStatus() == LogicalDeletion.NORMAL_STATUS);
+		assertTrue(getTestRepository().findById(1).get().getStatus() == LogicalDeletion.DELETED_STATUS);
+		assertTrue(getTestRepository().findById(2).get().getStatus() == LogicalDeletion.DELETED_STATUS);
+		assertTrue(getTestRepository().findById(3).get().getStatus() == LogicalDeletion.DELETED_STATUS);
+		assertTrue(getTestRepository().findById(4).get().getStatus() == LogicalDeletion.NORMAL_STATUS);
 	}
 
 	@Test
@@ -165,7 +165,7 @@ public class ReadWriteSoftDeleteRepositoryTest extends AbstractReadOnlySoftDelet
 		getTestRepository().deleteAll(entities);
 		getEntityManager().clear();
 
-		assertTrue(getTestRepository().getOne(100).getStatus() == LogicalDeletion.DELETED_STATUS);
+		assertTrue(getTestRepository().findById(100).get().getStatus() == LogicalDeletion.DELETED_STATUS);
 	}
 
 	@Test(expected = DataAccessException.class)
@@ -204,12 +204,12 @@ public class ReadWriteSoftDeleteRepositoryTest extends AbstractReadOnlySoftDelet
 		getTestRepository().deleteById(1);
 		getTestRepository().flush();
 		getEntityManager().clear();
-		TestEntity e1 = getTestRepository().getOne(1);
+		TestEntity e1 = getTestRepository().findById(1).get();
 		assertTrue(e1.getStatus() == LogicalDeletion.DELETED_STATUS);
 		getEntityManager().getTransaction().commit();
 		getEntityManager().clear();
 
-		e1 = getTestRepository().getOne(1);
+		e1 = getTestRepository().findById(1).get();
 		assertTrue(e1.getStatus() == LogicalDeletion.DELETED_STATUS);
 	}
 	
@@ -220,12 +220,12 @@ public class ReadWriteSoftDeleteRepositoryTest extends AbstractReadOnlySoftDelet
 		getTestRepository().deleteById(1);
 		getTestRepository().flush();
 		getEntityManager().clear();
-		TestEntity e1 = getTestRepository().getOne(1);
+		TestEntity e1 = getTestRepository().findById(1).get();
 		assertTrue(e1.getStatus() == LogicalDeletion.DELETED_STATUS);
 		getEntityManager().getTransaction().rollback();
 		getEntityManager().clear();
 
-		e1 = getTestRepository().getOne(1);
+		e1 = getTestRepository().findById(1).get();
 		assertTrue(e1.getStatus() == LogicalDeletion.NORMAL_STATUS);                 
 	}
 

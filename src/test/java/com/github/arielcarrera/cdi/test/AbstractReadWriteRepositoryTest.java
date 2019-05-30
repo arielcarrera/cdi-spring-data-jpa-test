@@ -7,6 +7,7 @@ import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.hibernate.exception.ConstraintViolationException;
 import org.junit.Test;
@@ -142,15 +143,15 @@ public abstract class AbstractReadWriteRepositoryTest extends AbstractReadOnlyRe
 		assertNotNull(l);
 		assertTrue(l.size() == 20);
 		
-		TestEntity e = getTestRepository().getOne(1);
-		assertNotNull(e);
-		assertTrue(e.getValue().equals(201));
-		e = getTestRepository().getOne(2);
-		assertNotNull(e);
-		assertTrue(e.getValue().equals(202));
-		e = getTestRepository().getOne(3);
-		assertNotNull(e);
-		assertTrue(e.getValue().equals(203));
+		Optional<TestEntity> e = getTestRepository().findById(1);
+		assertTrue(e.isPresent());
+		assertTrue(e.get().getValue().equals(201));
+		e = getTestRepository().findById(2);
+		assertTrue(e.isPresent());
+		assertTrue(e.get().getValue().equals(202));
+		e = getTestRepository().findById(3);
+		assertTrue(e.isPresent());
+		assertTrue(e.get().getValue().equals(203));
 	}
 
 	@Test(expected = DataAccessException.class)
@@ -182,28 +183,25 @@ public abstract class AbstractReadWriteRepositoryTest extends AbstractReadOnlyRe
 		assertTrue(result.getId().equals(21));
 		
 		assertTrue(getTestRepository().findAll().size() == 21);
-		TestEntity e = getTestRepository().getOne(21);
-		assertNotNull(e);
-		assertTrue(e.getId().equals(21));
-		assertTrue(e.getValue().equals(121));
+		Optional<TestEntity> e = getTestRepository().findById(21);
+		assertTrue(e.isPresent());
+		assertTrue(e.get().getId().equals(21));
+		assertTrue(e.get().getValue().equals(121));
 	}
 
 	@Test
 	public void flush_OK() {
 		getEntityManager().getTransaction().begin();
-		TestEntity result = getTestRepository().save(new TestEntity(21, 121));
+		getTestRepository().save(new TestEntity(21, 121));
 		getTestRepository().flush();
 		getEntityManager().getTransaction().commit();
 		getEntityManager().clear();
 		
-		assertNotNull(result);
-		assertTrue(result.getId().equals(21));
-		
+		Optional<TestEntity> e = getTestRepository().findById(21);
+		assertTrue(e.isPresent());
+		assertTrue(e.get().getId().equals(21));
+		assertTrue(e.get().getValue().equals(121));
 		assertTrue(getTestRepository().findAll().size() == 21);
-		TestEntity e = getTestRepository().getOne(21);
-		assertNotNull(e);
-		assertTrue(e.getId().equals(21));
-		assertTrue(e.getValue().equals(121));
 	}
 
 }
