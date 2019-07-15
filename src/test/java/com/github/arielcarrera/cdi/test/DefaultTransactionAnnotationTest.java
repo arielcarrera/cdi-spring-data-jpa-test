@@ -1,6 +1,7 @@
 package com.github.arielcarrera.cdi.test;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -30,8 +31,11 @@ import com.github.arielcarrera.cdi.test.config.JtaEnvironment;
 import com.github.arielcarrera.cdi.test.entities.TestEntity;
 import com.github.arielcarrera.cdi.test.repositories.TestReadOnlyRepository;
 import com.github.arielcarrera.cdi.test.services.DefaultTransactionalTestService;
+import com.github.arielcarrera.cdi.test.services.TransactionalCrossRepositoryService;
 
 import io.agroal.api.AgroalDataSourceMetrics;
+
+import java.util.Optional;
 
 /**
  * Tests for Writable Repository with soft delete operations
@@ -72,6 +76,9 @@ public class DefaultTransactionAnnotationTest {
 
 	@Inject
 	protected DefaultTransactionalTestService service;
+	
+	@Inject
+	protected TransactionalCrossRepositoryService crossService;
 	
 	@Inject
 	private TestReadOnlyRepository repo;
@@ -301,4 +308,41 @@ public class DefaultTransactionAnnotationTest {
 		getEntityManager().clear();
 		assertTrue(repo.existsById(1));
 	}
+	
+	
+	@Test
+	public void multiRepositoryService_SharedTransaction_SameRepo() {
+	    crossService.sameRepo(new TestEntity(10, 10, 10, LogicalDeletion.NORMAL_STATUS));
+	    Optional<TestEntity> e = repo.findById(10);
+	    assertTrue(e.isPresent());
+	    assertTrue(e.get().getStatus() == LogicalDeletion.DELETED_STATUS);
+	}
+	
+	@Test
+	public void multiRepositoryService_SharedContext() {
+	    crossService.crossRepo(new TestEntity(10, 10, 10, LogicalDeletion.NORMAL_STATUS));
+	    assertFalse(repo.existsById(10));
+	}
+	
+	@Test
+	public void multiRepositoryService_MultiSaves() {
+	    crossService.crossRepoMultipleSaves(new TestEntity(10, 10, 10, LogicalDeletion.NORMAL_STATUS),
+		    new TestEntity(11, 11, 11, LogicalDeletion.NORMAL_STATUS));
+		assertTrue(repo.existsById(10));
+		assertTrue(repo.existsById(11));
+	}
+	
+	@Test
+	public void multiRepositoryService_MultiSavesRollback() {
+	    try {
+		crossService.crossRepoMultipleSavesRollback(new TestEntity(10, 10, 10, LogicalDeletion.NORMAL_STATUS),
+			    new TestEntity(11, 11, 11, LogicalDeletion.NORMAL_STATUS));
+	    } catch (Exception ex) {
+		assertFalse(repo.existsById(10));
+		assertFalse(repo.existsById(11));
+	    }
+	    
+	}
+	
+	
 }

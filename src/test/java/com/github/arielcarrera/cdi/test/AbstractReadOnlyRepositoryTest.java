@@ -50,7 +50,7 @@ public abstract class AbstractReadOnlyRepositoryTest {
 	@ClassRule
 	public static JtaEnvironment jtaEnvironment = new JtaEnvironment();
 	@Rule
-	public WeldInitiator weld = WeldInitiator.from(new Weld()).activate(RequestScoped.class, ApplicationScoped.class)
+	public WeldInitiator weld = WeldInitiator.from(new Weld()).activate(RequestScoped.class)
 				.inject(this).build();
 	
 	@Rule

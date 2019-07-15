@@ -6,6 +6,6 @@ import com.github.arielcarrera.cdi.repositories.ReadOnlyRepository;
 import com.github.arielcarrera.cdi.test.entities.TestEntity;
 
 @Eager
-public interface TestReadOnlyRepository extends ReadOnlyRepository<TestEntity, Integer>{
+public interface TestReadOnlyRepository extends ReadOnlyRepository<TestEntity, Integer>, CustomFragment, CustomFragment2 {
 
 }
