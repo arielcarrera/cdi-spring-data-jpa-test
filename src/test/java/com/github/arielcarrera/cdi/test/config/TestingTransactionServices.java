@@ -38,6 +38,13 @@ public class TestingTransactionServices implements TransactionServices {
 
 	@Override
 	public UserTransaction getUserTransaction() {
-		return com.arjuna.ats.jta.UserTransaction.userTransaction();
+	   UserTransaction ut = com.arjuna.ats.jta.UserTransaction.userTransaction();
+	   try {
+	    ut.setTransactionTimeout(600000);//FOR DEBUG PURPOSE
+	} catch (SystemException e) {
+	    // TODO Auto-generated catch block
+	    e.printStackTrace();
+	}
+		return ut;
 	}
 }

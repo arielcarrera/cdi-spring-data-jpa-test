@@ -40,12 +40,16 @@
 			<property name="hibernate.connection.username" value=""/>
 			<property name="hibernate.connection.password" value=""/>
 			<property name="hibernate.jdbc.batch_size" value="10"/>
+			<!-- We provide our own connection provider, in order to integrate Agroal with Hibernate -->
 			<property name="hibernate.connection.provider_class" value="com.github.arielcarrera.cdi.test.config.AgroalConnectionProvider"/>
 			<property name="hibernate.agroal.maxSize" value="3"/>
             <property name="hibernate.agroal.acquisitionTimeout" value="PT1s"/>
             <property name="hibernate.agroal.reapTimeout" value="PT10s"/>
             <property name="hibernate.agroal.metricsEnabled" value="true"/>
 			
+			<!-- test without agroal tx integration -->
+			<!-- Set Hibernate to use Narayana as a JTA platform -->
+			<property name="hibernate.transaction.jta.platform" value="JBossTS"/>
         </properties>
 
     </persistence-unit>

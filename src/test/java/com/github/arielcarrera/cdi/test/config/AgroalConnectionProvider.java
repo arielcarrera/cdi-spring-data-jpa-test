@@ -93,15 +93,25 @@ public class AgroalConnectionProvider implements ConnectionProvider, Configurabl
 	LOGGER.debug("Configuring Agroal");
 	if (agroalDataSource == null) {
 	    try {
-		TransactionManager transactionManager = com.arjuna.ats.jta.TransactionManager.transactionManager();
-		transactionManager.setTransactionTimeout(300); // SE pone fijo 5 minutos para fines de debug
-		TransactionSynchronizationRegistry transactionSynchronizationRegistry = new com.arjuna.ats.internal.jta.transaction.arjunacore.TransactionSynchronizationRegistryImple();
-
-		TransactionIntegration txIntegration = new NarayanaTransactionIntegration(transactionManager,
-			transactionSynchronizationRegistry, "java:/testds", false);
-
-		AgroalPropertiesReader agroalProperties = new AgroalPropertiesReader(CONFIG_PREFIX)
-			.readProperties(props);
+//		TransactionManager transactionManager = com.arjuna.ats.jta.TransactionManager.transactionManager();
+//		transactionManager.setTransactionTimeout(300); // SE pone fijo 5 minutos para fines de debug
+//		TransactionSynchronizationRegistry transactionSynchronizationRegistry = new com.arjuna.ats.internal.jta.transaction.arjunacore.TransactionSynchronizationRegistryImple();
+//
+//		TransactionIntegration txIntegration = new NarayanaTransactionIntegration(transactionManager,
+//			transactionSynchronizationRegistry, "java:/testds", false);
+//
+//		AgroalPropertiesReader agroalProperties = new AgroalPropertiesReader(CONFIG_PREFIX)
+//			.readProperties(props);
+//		agroalProperties.modify().connectionPoolConfiguration(cp -> cp.connectionFactoryConfiguration(cf -> {
+//		    copyProperty(props, AvailableSettings.DRIVER, cf::connectionProviderClassName, Function.identity());
+//		    copyProperty(props, AvailableSettings.URL, cf::jdbcUrl, Function.identity());
+//		    copyProperty(props, AvailableSettings.USER, cf::principal, NamePrincipal::new);
+//		    copyProperty(props, AvailableSettings.PASS, cf::credential, SimplePassword::new);
+//		    copyProperty(props, AvailableSettings.AUTOCOMMIT, cf::autoCommit, Boolean::valueOf);
+//		    resolveIsolationSetting(props, cf);
+//		    return cf;
+//		}).transactionIntegration(txIntegration));
+		AgroalPropertiesReader agroalProperties = new AgroalPropertiesReader( CONFIG_PREFIX ).readProperties( props );
 		agroalProperties.modify().connectionPoolConfiguration(cp -> cp.connectionFactoryConfiguration(cf -> {
 		    copyProperty(props, AvailableSettings.DRIVER, cf::connectionProviderClassName, Function.identity());
 		    copyProperty(props, AvailableSettings.URL, cf::jdbcUrl, Function.identity());
@@ -109,8 +119,9 @@ public class AgroalConnectionProvider implements ConnectionProvider, Configurabl
 		    copyProperty(props, AvailableSettings.PASS, cf::credential, SimplePassword::new);
 		    copyProperty(props, AvailableSettings.AUTOCOMMIT, cf::autoCommit, Boolean::valueOf);
 		    resolveIsolationSetting(props, cf);
-		    return cf;
-		}).transactionIntegration(txIntegration));
+			return cf;
+		} ) );
+
 		agroalDataSource = AgroalDataSource.from(agroalProperties);
 	    } catch (Exception e) {
 		throw new HibernateException(e);
