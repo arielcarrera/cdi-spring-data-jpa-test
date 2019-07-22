@@ -73,4 +73,9 @@ public class DefaultTransactionalTestService {
 	public void doSomethingNoWrapped(TestEntity e) {
 		repo.save(e);
 	}
+	
+	@Transactional
+	public boolean testEntityManagerContains(Integer i) {
+	    return repo.contains(repo.findById(i).get());
+	}
 }

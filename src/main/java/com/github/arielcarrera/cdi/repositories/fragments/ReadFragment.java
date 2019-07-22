@@ -33,6 +33,15 @@ public interface ReadFragment<T, ID extends Serializable> extends QueryByExample
 	 * @throws IllegalArgumentException if {@code id} is {@literal null}.
 	 */
 	Optional<T> findById(ID id);
+	
+	/**
+	 * Retrieves an entity by its id.
+	 *
+	 * @param id must not be {@literal null}.
+	 * @return the entity with the given id or null
+	 * @throws IllegalArgumentException if {@code id} is {@literal null}.
+	 */
+	T findOneById(ID id);
 
 	/**
 	 * Returns whether an entity with the given id exists.

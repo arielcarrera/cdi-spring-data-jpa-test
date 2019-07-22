@@ -14,4 +14,6 @@ public interface CustomJpaRepository {
 
 	EntityManager entityManager();
 	
+	boolean contains(Object object);
+	
 }

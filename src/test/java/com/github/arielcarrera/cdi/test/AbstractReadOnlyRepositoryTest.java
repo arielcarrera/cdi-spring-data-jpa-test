@@ -128,6 +128,12 @@ public abstract class AbstractReadOnlyRepositoryTest {
 		assertNotNull(getTestRepository().entityManager());
 	}
 	
+        // el metodo insideTx se encuentra en RequestEntityManagerTest
+        @Test
+        public void entityManager_contains_outsideTx() {
+    		assertFalse(getTestRepository().contains(getTestRepository().findOneById(1)));
+        }
+	
 	@Test
 	public void findById_OK() {
 		Optional<TestEntity> op = getTestRepository().findById(1);

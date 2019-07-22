@@ -13,15 +13,20 @@ import javax.persistence.EntityManager;
  */
 public class CustomJpaRepositoryImpl implements CustomJpaRepository {
 
-	@Inject
-	EntityManager entityManager;
-	
-	public EntityManager entityManager() {
-		return entityManager;
-	}
-
-	public CustomJpaRepositoryImpl() {
+    public CustomJpaRepositoryImpl() {
 		super();
-	}
-	
+    }
+
+    @Inject
+    EntityManager entityManager;
+
+    @Override
+    public EntityManager entityManager() {
+	return entityManager;
+    }
+
+    @Override
+    public boolean contains(Object object) {
+	return entityManager.contains(object);
+    }
 }

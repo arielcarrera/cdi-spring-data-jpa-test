@@ -11,6 +11,8 @@ import javax.inject.Inject;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
+import org.springframework.data.RepositoryCreation;
+
 /**
  * EntityManagerFactory producer
  * 
@@ -32,6 +34,18 @@ public class EntityManagerFactoryProducer {
 	}
 
 	public void close(@Disposes EntityManagerFactory emf) {
+		emf.close();
+	}
+	
+	@Produces @RepositoryCreation
+	@ApplicationScoped
+	public EntityManagerFactory produceEntityManagerFactoryCreation() {
+		Map<String, Object> props = new HashMap<>();
+		props.put("javax.persistence.bean.manager", beanManager);
+		return Persistence.createEntityManagerFactory("testPersistenceUnit", props);
+	}
+
+	public void closeCreation(@Disposes @RepositoryCreation EntityManagerFactory emf) {
 		emf.close();
 	}
 }

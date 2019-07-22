@@ -319,7 +319,7 @@ public class DefaultTransactionAnnotationTest {
 	}
 	
 	@Test
-	public void multiRepositoryService_SharedContext() {
+	public void multiRepositoryService_SharedPersistenceContext() {
 	    crossService.crossRepo(new TestEntity(10, 10, 10, LogicalDeletion.NORMAL_STATUS));
 	    assertFalse(repo.existsById(10));
 	}
