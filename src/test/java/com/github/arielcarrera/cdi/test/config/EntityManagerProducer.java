@@ -1,5 +1,6 @@
 package com.github.arielcarrera.cdi.test.config;
 
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.context.RequestScoped;
@@ -8,6 +9,8 @@ import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.transaction.SystemException;
+import javax.transaction.TransactionManager;
 
 import org.springframework.data.RepositoryCreation;
 
@@ -43,5 +46,19 @@ public class EntityManagerProducer {
 
     public void closeCreation(@Disposes @RepositoryCreation EntityManager em) {
         em.close();
+    }
+    
+    
+    @Inject
+    private TransactionManager tm;
+
+    @PostConstruct
+    public void setTimeout() {
+	try {
+	    tm.setTransactionTimeout(600000);
+	} catch (SystemException e) {
+	    // TODO Auto-generated catch block
+	    e.printStackTrace();
+	}
     }
 }

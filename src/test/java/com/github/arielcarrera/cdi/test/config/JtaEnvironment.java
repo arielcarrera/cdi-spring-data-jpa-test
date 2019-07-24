@@ -1,8 +1,5 @@
 package com.github.arielcarrera.cdi.test.config;
 
-import javax.naming.InitialContext;
-
-import org.h2.jdbcx.JdbcDataSource;
 import org.jnp.server.NamingBeanImpl;
 import org.junit.rules.ExternalResource;
 

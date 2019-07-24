@@ -32,7 +32,6 @@ public class TransactionalConnectionProvider implements ConnectionProvider {
         dataSource.setURL("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1");
         dataSource.setUser(USERNAME);
         dataSource.setPassword(PASSWORD);
-
         try {
             InitialContext initialContext = new InitialContext();
             initialContext.bind(DATASOURCE_JNDI, dataSource);
