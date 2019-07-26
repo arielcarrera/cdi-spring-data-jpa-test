@@ -26,15 +26,19 @@ public class TransactionalConnectionProvider implements ConnectionProvider {
     public TransactionalConnectionProvider() {
         transactionalDriver = new TransactionalDriver();
     }
-
-    public static void bindDataSource() {
+    
+    public static JdbcDataSource getDataSource() {
         JdbcDataSource dataSource = new JdbcDataSource();
         dataSource.setURL("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1");
         dataSource.setUser(USERNAME);
         dataSource.setPassword(PASSWORD);
+        return dataSource;
+    }
+
+    public static void bindDataSource() {
         try {
             InitialContext initialContext = new InitialContext();
-            initialContext.bind(DATASOURCE_JNDI, dataSource);
+            initialContext.bind(DATASOURCE_JNDI, getDataSource());
         }
         catch (NamingException e) {
             throw new RuntimeException(e);

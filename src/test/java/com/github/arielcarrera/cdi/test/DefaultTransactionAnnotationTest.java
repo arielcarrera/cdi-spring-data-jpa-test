@@ -260,15 +260,29 @@ public class DefaultTransactionAnnotationTest {
     }
 
     @Test(expected = RuntimeException.class)
-    public void supportsTransactionalServiceWithInnerRequiresNewInvocation_RollbackOnlyOne() {
+    public void supportsTransactionalServiceWithInnerRequiresNewInvocation_Rollback_FirstSave() {
 	try {
-	    service2.doSomethingRequiresNew(new TestEntity(1, 1, 1, LogicalDeletion.NORMAL_STATUS),
+	    service2.doSomethingRequiresNewFirstSave(new TestEntity(1, 1, 1, LogicalDeletion.NORMAL_STATUS),
 		    new TestEntity(2, 2, 2, LogicalDeletion.NORMAL_STATUS));
 	    throw new RuntimeException();
 	} catch (Exception e) {
 	    getEntityManager().clear();
 	    assertFalse(repo.existsById(1));
 	    assertTrue(repo.existsById(2));
+	    throw e;
+	}
+    }
+    
+    @Test(expected = RuntimeException.class)
+    public void supportsTransactionalServiceWithInnerRequiresNewInvocation_Rollback_FirstNew() {
+	try {
+	    service2.doSomethingRequiresNewFirstNew(new TestEntity(1, 1, 1, LogicalDeletion.NORMAL_STATUS),
+		    new TestEntity(2, 2, 2, LogicalDeletion.NORMAL_STATUS));
+	    throw new RuntimeException();
+	} catch (Exception e) {
+	    getEntityManager().clear();
+	    assertTrue(repo.existsById(1));
+	    assertFalse(repo.existsById(2));
 	    throw e;
 	}
     }

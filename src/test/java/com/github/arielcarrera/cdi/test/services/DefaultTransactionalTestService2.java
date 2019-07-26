@@ -21,10 +21,18 @@ public class DefaultTransactionalTestService2 {
 	
 	//Transactional Service with inner invocation requires_new (warning: call to methods with @Transaction with a proxy reference like this) 
 	@Transactional(value=TxType.REQUIRED)
-	public void doSomethingRequiresNew(TestEntity e, TestEntity e2) {
-		repo.save(e);
-		svc1.doSomethingRequiresNew(e2);
-		throw new RuntimeException();
+	public void doSomethingRequiresNewFirstSave(TestEntity e, TestEntity e2) {
+	    repo.save(e);
+	    svc1.doSomethingRequiresNew(e2);
+	    throw new RuntimeException();
+	}
+	
+	//Transactional Service with inner invocation requires_new (warning: call to methods with @Transaction with a proxy reference like this)
+	@Transactional(value=TxType.REQUIRED)
+	public void doSomethingRequiresNewFirstNew(TestEntity e, TestEntity e2) {
+	    svc1.doSomethingRequiresNew(e);
+	    repo.save(e2);	    
+	    throw new RuntimeException();
 	}
 	
 }

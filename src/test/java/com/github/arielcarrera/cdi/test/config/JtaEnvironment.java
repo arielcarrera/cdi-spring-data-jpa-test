@@ -31,7 +31,7 @@ public class JtaEnvironment extends ExternalResource {
 	}
 
 
-	static void setObjectStoreDir() {
+	public static void setObjectStoreDir() {
 		BeanPopulator.getDefaultInstance(ObjectStoreEnvironmentBean.class).setObjectStoreDir("target/tx-object-store");
 		BeanPopulator.getNamedInstance(ObjectStoreEnvironmentBean.class, "communicationStore")
 				.setObjectStoreDir("target/tx-object-store");
