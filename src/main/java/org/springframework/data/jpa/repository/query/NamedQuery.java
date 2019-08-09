@@ -58,7 +58,7 @@ final class NamedQuery extends AbstractJpaQuery {
 	private final boolean namedCountQueryIsPresent;
 	private final DeclaredQuery declaredQuery;
 
-	//modificado entityManager
+	//Changed for entityManager issue
 	/**
 	 * Creates a new {@link NamedQuery}.
 	 */
@@ -97,7 +97,7 @@ final class NamedQuery extends AbstractJpaQuery {
 					+ "via this Pageable will not be applied!", method);
 		}
 	}
-	//fin modificado entityManger
+	//end Changed for entityManager issue
 
 	/**
 	 * Returns whether the named query with the given name exists.
@@ -132,7 +132,7 @@ final class NamedQuery extends AbstractJpaQuery {
 	 * @param em must not be {@literal null}.
 	 * @return
 	 */
-	//modificado entityManger
+	//Changed for entityManager issue
 	@Nullable
 	public static RepositoryQuery lookupFrom(JpaQueryMethod method, EntityManager em, EntityManager emCreation) {
 
@@ -152,7 +152,7 @@ final class NamedQuery extends AbstractJpaQuery {
 			return null;
 		}
 	}
-	//fin modificado entityManger
+	//end Changed for entityManager issue
 
 	/*
 	 * (non-Javadoc)

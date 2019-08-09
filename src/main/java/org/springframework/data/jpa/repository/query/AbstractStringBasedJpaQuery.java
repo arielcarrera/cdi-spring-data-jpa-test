@@ -43,7 +43,7 @@ abstract class AbstractStringBasedJpaQuery extends AbstractJpaQuery {
 	private final QueryMethodEvaluationContextProvider evaluationContextProvider;
 	private final SpelExpressionParser parser;
 
-	//modificado entityManager
+	//Changed for entityManager issue
 	/**
 	 * Creates a new {@link AbstractStringBasedJpaQuery} from the given {@link JpaQueryMethod}, {@link EntityManager} and
 	 * query {@link String}.
@@ -75,7 +75,7 @@ abstract class AbstractStringBasedJpaQuery extends AbstractJpaQuery {
         	Assert.isTrue(method.isNativeQuery() || !query.usesJdbcStyleParameters(),
         			"JDBC style parameters (?) are not supported for JPA queries.");
         }
-	//fin modificado entityManager
+	//end Changed for entityManager issue
 
 	/*
 	 * (non-Javadoc)

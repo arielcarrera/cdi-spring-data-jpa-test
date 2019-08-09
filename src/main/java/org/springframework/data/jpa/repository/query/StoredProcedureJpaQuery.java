@@ -44,7 +44,7 @@ class StoredProcedureJpaQuery extends AbstractJpaQuery {
 	private final StoredProcedureAttributes procedureAttributes;
 	private final boolean useNamedParameters;
 
-	//modificado entityManager
+	//Changed for entityManager issue
 	/**
 	 * Creates a new {@link StoredProcedureJpaQuery}.
 	 *
@@ -59,7 +59,7 @@ class StoredProcedureJpaQuery extends AbstractJpaQuery {
 		this.useNamedParameters = useNamedParameters(method);
 
 	}
-	//fin modificado entityManager
+	//end Changed for entityManager issue
 
 	/**
 	 * Determine whether to used named parameters for the given query method.

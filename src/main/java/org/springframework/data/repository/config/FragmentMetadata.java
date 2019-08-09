@@ -54,7 +54,7 @@ public class FragmentMetadata {
 		Assert.hasText(interfaceName, "Interface name must not be null or empty!");
 		
 		String[] interfaceNames = getClassMetadata(interfaceName).getInterfaceNames();
-		//BEGIN CHANGE
+		//BEGIN CHANGE LOOKUP
 		//search for inherited interfaces
 		Set<String> data = new HashSet<String>();
 		
@@ -64,7 +64,7 @@ public class FragmentMetadata {
 		
 		return data.stream().filter(this::isCandidate);
 		
-		//END CHANGE
+		//END CHANGE LOOKUP
 	}
 
 	/**
@@ -101,7 +101,7 @@ public class FragmentMetadata {
 		}
 	}
 	
-	//CHANGE ADDED
+	//CHANGE LOOKUP
 	private static final String CLASS_LOADING_ERROR = "Could not load type %s.";
 	private static final Logger LOGGER = LoggerFactory.getLogger(FragmentMetadata.class);
 	
@@ -140,5 +140,5 @@ public class FragmentMetadata {
 		}
 	}
 	
-	//END CHANGE
+	//END CHANGE LOOKUP
 }

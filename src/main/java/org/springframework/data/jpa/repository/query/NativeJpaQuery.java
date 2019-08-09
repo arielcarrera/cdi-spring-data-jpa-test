@@ -36,7 +36,7 @@ import org.springframework.lang.Nullable;
  * @author Jens Schauder
  */
 final class NativeJpaQuery extends AbstractStringBasedJpaQuery {
-//modificado entitymanager
+//Changed for entityManager issue
 	/**
 	 * Creates a new {@link NativeJpaQuery} encapsulating the query annotated on the given {@link JpaQueryMethod}.
 	 *
@@ -58,7 +58,7 @@ final class NativeJpaQuery extends AbstractStringBasedJpaQuery {
 		}
 	}
 	
-	//fin modificado entitymanager
+//end Changed for entityManager issue
 
 	/*
 	 * (non-Javadoc)

@@ -46,7 +46,7 @@ import org.springframework.data.repository.cdi.CdiRepositoryExtensionSupport;
  * @author Mark Paluch
  * @author Christoph Strobl
  */
-//Creado para agregar lo del entitymanager
+//Changed for entityManager issue
 public class JpaRepositoryExtension extends CdiRepositoryExtensionSupport {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(JpaRepositoryExtension.class);
@@ -117,9 +117,9 @@ public class JpaRepositoryExtension extends CdiRepositoryExtensionSupport {
 
 		// Determine the entity manager bean which matches the qualifiers of the repository.
 		Bean<EntityManager> entityManagerBean = entityManagers.get(qualifiers);
-		//MODIFICADO para agregar entitymanager
+		//Changed for entityManager issue
 		Bean<EntityManager> entityManagerBeanCreation = null;
-		//Se busca un entitymanager dependiente para la creacion
+		//search for an entity manager for startup
 		for (Set<Annotation> s : entityManagers.keySet()) {
 			if (s.toString().contains(RepositoryCreation.class.getName())) {
 				entityManagerBeanCreation = entityManagers.get(s);
@@ -139,5 +139,6 @@ public class JpaRepositoryExtension extends CdiRepositoryExtensionSupport {
 		// Construct and return the repository bean.
 		return new JpaRepositoryBean<T>(beanManager, entityManagerBean, entityManagerBeanCreation, qualifiers, repositoryType,
 				Optional.of(getCustomImplementationDetector()));
+		//End Changed for entityManager issue
 	}
 }

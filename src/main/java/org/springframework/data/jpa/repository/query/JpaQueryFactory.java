@@ -38,7 +38,7 @@ enum JpaQueryFactory {
 
 	private static final SpelExpressionParser PARSER = new SpelExpressionParser();
 	private static final Logger LOG = LoggerFactory.getLogger(JpaQueryFactory.class);
-//Modificado entityManager
+//Changed for entityManager issue
 	/**
 	 * Creates a {@link RepositoryQuery} from the given {@link QueryMethod} that is potentially annotated with
 	 * {@link Query}.
@@ -96,5 +96,5 @@ enum JpaQueryFactory {
 
 		return new StoredProcedureJpaQuery(method, em, emCreation);
 	}
-//Fin Modificado entityManager
+//End Changed for entityManager issue
 }

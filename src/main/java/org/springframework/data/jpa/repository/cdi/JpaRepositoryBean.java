@@ -38,11 +38,11 @@ import org.springframework.util.Assert;
  * @author Christoph Strobl
  * @param <T> The type of the repository.
  */
-//NOTA: Agregado por cambio del entitymanager
+//NOTE: Changed for entityManager issue
 class JpaRepositoryBean<T> extends CdiRepositoryBean<T> {
 
 	private final Bean<EntityManager> entityManagerBean;
-	//Agregado entitymanager
+	//Added for entityManager issue
 	private final Bean<EntityManager> entityManagerBeanCreation;
 
 	/**
@@ -56,7 +56,7 @@ class JpaRepositoryBean<T> extends CdiRepositoryBean<T> {
 	 */
 	JpaRepositoryBean(BeanManager beanManager, Bean<EntityManager> entityManagerBean, Set<Annotation> qualifiers,
 			Class<T> repositoryType, Optional<CustomRepositoryImplementationDetector> detector) {
-//comentado cambio entitymanager
+//Changed for entityManager issue
 //		super(qualifiers, repositoryType, beanManager, detector);
 //
 //		Assert.notNull(entityManagerBean, "EntityManager bean must not be null!");
@@ -64,8 +64,9 @@ class JpaRepositoryBean<T> extends CdiRepositoryBean<T> {
 		//agregado cambio entitymanager
 		this(beanManager, entityManagerBean, entityManagerBean, qualifiers, repositoryType, detector);
 	}
+//End Changed for entityManager issue	
 	
-	//metodo agregado por cambio de entitymanager
+	//added for entityManager issue
 	JpaRepositoryBean(BeanManager beanManager, Bean<EntityManager> entityManagerBean, Bean<EntityManager> entityManagerBeanCreation, Set<Annotation> qualifiers,
 			Class<T> repositoryType, Optional<CustomRepositoryImplementationDetector> detector) {
 		super(qualifiers, repositoryType, beanManager, detector);
@@ -83,7 +84,7 @@ class JpaRepositoryBean<T> extends CdiRepositoryBean<T> {
 
 		EntityManager entityManager = getDependencyInstance(entityManagerBean, EntityManager.class);
 		
-		//agregado
+		//added for entityManager issue
 		EntityManager entityManagerDependent = getDependencyInstance(entityManagerBeanCreation, EntityManager.class);
 		
 

@@ -52,7 +52,7 @@ public class PartTreeJpaQuery extends AbstractJpaQuery {
 
 	private final QueryPreparer query;
 	private final QueryPreparer countQuery;
-	//modificado entityManager
+	//Changed for entityManager issue
 	//private final EntityManager em; 
 	private final EscapeCharacter escape;
 
@@ -86,7 +86,7 @@ public class PartTreeJpaQuery extends AbstractJpaQuery {
 					String.format("Failed to create query for method %s! %s", method, o_O.getMessage()), o_O);
 		}
 	}
-	//fin modificado entityManager
+	//end Changed for entityManager issue
 
 	/*
 	 * (non-Javadoc)
@@ -115,9 +115,9 @@ public class PartTreeJpaQuery extends AbstractJpaQuery {
 	protected JpaQueryExecution getExecution() {
 
 		if (this.tree.isDelete()) {
-		//modificado entityManager
+		//Changed for entityManager issue
 			return new DeleteExecution(getEntityManager());
-		//fin modificado entityManager
+		//end Changed for entityManager issue
 		} else if (this.tree.isExistsProjection()) {
 			return new ExistsExecution();
 		}
@@ -228,9 +228,9 @@ public class PartTreeJpaQuery extends AbstractJpaQuery {
 
 		protected JpaQueryCreator createCreator(PersistenceProvider persistenceProvider,
 				Optional<ParametersParameterAccessor> accessor) {
-//modificado entityManager
+//Changed for entityManager issue
 			EntityManager entityManager = getEntityManagerCreation();
-//fin modificado entityManager
+//end Changed for entityManager issue
 			CriteriaBuilder builder = entityManager.getCriteriaBuilder();
 
 			ParameterMetadataProvider provider = accessor
@@ -283,9 +283,9 @@ public class PartTreeJpaQuery extends AbstractJpaQuery {
 		@Override
 		protected JpaQueryCreator createCreator(PersistenceProvider persistenceProvider,
 				Optional<ParametersParameterAccessor> accessor) {
-//Modificado entityManager
+//Changed for entityManager issue
 			EntityManager entityManager = getEntityManagerCreation();
-//fin Modificado entityManager
+//end Changed for entityManager issue
 			CriteriaBuilder builder = entityManager.getCriteriaBuilder();
 
 			ParameterMetadataProvider provider = accessor

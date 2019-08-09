@@ -84,7 +84,7 @@ public class SimpleJpaRepository<T, ID> implements JpaRepositoryImplementation<T
 	private @Nullable CrudMethodMetadata metadata;
 	private EscapeCharacter escapeCharacter = EscapeCharacter.DEFAULT;
 
-	//modificado entityManager
+	//Changed for entityManager issue
 	/**
 	 * Creates a new {@link SimpleJpaRepository} to manage objects of the given {@link JpaEntityInformation}.
 	 *
@@ -112,7 +112,7 @@ public class SimpleJpaRepository<T, ID> implements JpaRepositoryImplementation<T
 	public SimpleJpaRepository(Class<T> domainClass, EntityManager em, EntityManager emCreation) {
 		this(JpaEntityInformationSupport.getEntityInformation(domainClass, (emCreation != null ? emCreation : em)), em, emCreation);
 	}
-	//fin modificado entityManager
+	//end Changed for entityManager issue
 	/**
 	 * Configures a custom {@link CrudMethodMetadata} to be used to detect {@link LockModeType}s and query hints to be
 	 * applied to queries.

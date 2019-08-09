@@ -407,16 +407,15 @@ public abstract class CdiRepositoryBean<T> implements Bean<T>, PassivationCapabl
 	}
 
 	private static Class<?> lookupFragmentInterface(Class<?> repositoryType, String interfaceName) {
-		//CHANGE
+		//CHANGE LOOKUP
 		Set<Class<?>> data = new HashSet<Class<?>>();
 		data.addAll(lookUpHierarchy(repositoryType));
 		return data.stream().filter(it -> it.getName().equals(interfaceName)).findFirst().orElseThrow(() -> new IllegalArgumentException(String.format("Did not find type %s in %s!", interfaceName,
 				Arrays.asList(repositoryType.getInterfaces()))));				
-		//END CHANGE
+		//END CHANGE LOOKUP
 	}
 
-	//CHANGE ADDED
-	
+	//CHANGE ADDED LOOKUP
 	private static Set<Class<?>> lookUpHierarchy(Class<?> cls) {
 		if(cls == null || cls.equals(Object.class)) throw new IllegalArgumentException("Invalid parameters in lookUpHierarchy invocation");
 		Set<Class<?>> interfacesSet = new HashSet<Class<?>>();
@@ -441,7 +440,7 @@ public abstract class CdiRepositoryBean<T> implements Bean<T>, PassivationCapabl
         }
 	}
 	
-	//END CHANGE
+	//END CHANGE LOOKUP
 	/**
 	 * Creates the actual component instance.
 	 *

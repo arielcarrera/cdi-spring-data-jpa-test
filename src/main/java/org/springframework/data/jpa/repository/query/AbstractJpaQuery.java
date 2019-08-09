@@ -66,9 +66,8 @@ public abstract class AbstractJpaQuery implements RepositoryQuery {
 
 	private final JpaQueryMethod method;
 	private final EntityManager em;
-	//Agregado entityManager
+	//added for entityManager issue
 	private final EntityManager emCreation;
-	//Fin agregado entityManager
 	private final JpaMetamodel metamodel;
 	private final PersistenceProvider provider;
 
@@ -87,14 +86,14 @@ public abstract class AbstractJpaQuery implements RepositoryQuery {
 
 		this.method = method;
 		this.em = em;
-		//modificado entityManager
+		//Changed for entityManager issue
 		this.emCreation = em;
 		this.metamodel = JpaMetamodel.of(emCreation.getMetamodel());
 		this.provider = PersistenceProvider.fromEntityManager(emCreation);
-		//fin modificado entityManager
+		//End Changed for entityManager issue
 	}
 	
-	//Agregado entityManager
+	//Added for entityManager issue
 	public AbstractJpaQuery(JpaQueryMethod method, EntityManager em, EntityManager emCreation) {
 
 		Assert.notNull(method, "JpaQueryMethod must not be null!");
@@ -116,7 +115,7 @@ public abstract class AbstractJpaQuery implements RepositoryQuery {
 		return emCreation;
 	}
 	
-	//fin Agregado entityManager
+	//End added for entityManager issue
 	
 	/*
 	 * (non-Javadoc)
@@ -253,10 +252,10 @@ public abstract class AbstractJpaQuery implements RepositoryQuery {
 		Assert.notNull(query, "Query must not be null!");
 		Assert.notNull(method, "JpaQueryMethod must not be null!");
 
-		//modificado entityManager
+		//Changed for entityManager issue
 		Map<String, Object> hints = Jpa21Utils.tryGetFetchGraphHints(emCreation, method.getEntityGraph(),
 				getQueryMethod().getEntityInformation().getJavaType());
-		//fin modificado entityManager
+		//End Changed for entityManager issue
 		for (Map.Entry<String, Object> hint : hints.entrySet()) {
 			query.setHint(hint.getKey(), hint.getValue());
 		}

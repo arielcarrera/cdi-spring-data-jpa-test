@@ -62,11 +62,11 @@ import lombok.extern.slf4j.Slf4j;
  * @author Jens Schauder
  * @author Stefan Fussenegger
  */
-//agregado por el tema del entitymanager
+//Added for entityManager issue
 public class JpaRepositoryFactory extends RepositoryFactorySupport {
 
 	private final EntityManager entityManager;
-	//agregado entitymanager
+	//Added for entityManager issue
 	private final EntityManager entityManagerCreation;
 	private final QueryExtractor extractor;
 	private final CrudMethodMetadataPostProcessor crudMethodMetadataPostProcessor;
@@ -84,7 +84,7 @@ public class JpaRepositoryFactory extends RepositoryFactorySupport {
 		Assert.notNull(entityManager, "EntityManager must not be null!");
 
 		this.entityManager = entityManager;
-		//modificado entitymanager
+		//Changed for entityManager issue
 		this.entityManagerCreation = entityManager;
 		this.extractor = PersistenceProvider.fromEntityManager(entityManagerCreation);
 		
@@ -96,9 +96,9 @@ public class JpaRepositoryFactory extends RepositoryFactorySupport {
 		if (extractor.equals(PersistenceProvider.ECLIPSELINK)) {
 			addQueryCreationListener(new EclipseLinkProjectionQueryCreationListener(entityManagerCreation));
 		}
-		//fin modificado entitymanager
+		//end Changed for entityManager issue
 	}
-	//agregado entitymanager
+	//added for entityManager issue
 	public JpaRepositoryFactory(EntityManager entityManager,EntityManager entityManagerCreation) {
 
 		Assert.notNull(entityManager, "EntityManager must not be null!");
@@ -179,13 +179,13 @@ public class JpaRepositoryFactory extends RepositoryFactorySupport {
 		return (JpaRepositoryImplementation<?, ?>) repository;
 	}
 	
-	//Modificado por configuracion entitymanager
+	//Changed for entityManager issue
 	protected JpaRepositoryImplementation<?, ?> getTargetRepository(RepositoryInformation information,
 		EntityManager entityManager, EntityManager entityManagerCreation) {
 
 	JpaEntityInformation<?, Serializable> entityInformation = getEntityInformation(information.getDomainType());
 	Object repository = getTargetRepositoryViaReflection(information, entityInformation, entityManager, entityManagerCreation);
-
+	//end Changed for entityManager issue
 	Assert.isInstanceOf(JpaRepositoryImplementation.class, repository);
 
 	return (JpaRepositoryImplementation<?, ?>) repository;
@@ -221,10 +221,10 @@ public class JpaRepositoryFactory extends RepositoryFactorySupport {
 	@Override
 	protected Optional<QueryLookupStrategy> getQueryLookupStrategy(@Nullable Key key,
 			QueryMethodEvaluationContextProvider evaluationContextProvider) {
-	  //modificado entitymanager
+	  //Changed for entityManager issue
 		return Optional
 				.of(JpaQueryLookupStrategy.create(entityManager, entityManagerCreation, key, extractor, evaluationContextProvider, escapeCharacter));
-	  //fin modificado entitymanager
+	  //end Changed for entityManager issue
 	}
 
 	/*
@@ -234,9 +234,9 @@ public class JpaRepositoryFactory extends RepositoryFactorySupport {
 	@Override
 	@SuppressWarnings("unchecked")
 	public <T, ID> JpaEntityInformation<T, ID> getEntityInformation(Class<T> domainClass) {
-	  //modificado entitymanager
+	  //Changed for entityManager issue
 		return (JpaEntityInformation<T, ID>) JpaEntityInformationSupport.getEntityInformation(domainClass, entityManagerCreation);
-	  //fin modificado entitymanager
+	  //end Changed for entityManager issue
 	}
 
 	/*

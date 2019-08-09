@@ -57,7 +57,7 @@ public final class JpaQueryLookupStrategy {
 		private final EntityManager em;
 		private final QueryExtractor provider;
 
-		//modificado entityManager
+		//Changed for entityManager issue
 		private final EntityManager emCreation;
 		
 		/**
@@ -80,7 +80,7 @@ public final class JpaQueryLookupStrategy {
 		}
 
 		protected abstract RepositoryQuery resolveQuery(JpaQueryMethod method, EntityManager em, EntityManager emCreation, NamedQueries namedQueries);
-		//fin modificado entityManager
+		//end Changed for entityManager issue
 	}
 
 	/**
@@ -94,7 +94,7 @@ public final class JpaQueryLookupStrategy {
 		private final PersistenceProvider persistenceProvider;
 		private final EscapeCharacter escape;
 
-		//modificado entitymanager
+		//Changed for entityManager issue
 		public CreateQueryLookupStrategy(EntityManager em, EntityManager emCreation, QueryExtractor extractor, EscapeCharacter escape) {
 
 			super(em, emCreation, extractor);
@@ -107,7 +107,7 @@ public final class JpaQueryLookupStrategy {
 		protected RepositoryQuery resolveQuery(JpaQueryMethod method, EntityManager em, EntityManager emCreation, NamedQueries namedQueries) {
 			return new PartTreeJpaQuery(method, em, emCreation, persistenceProvider, escape);
 		}
-		//fin modificado entitymanager
+		//end Changed for entityManager issue
 	}
 
 	/**
@@ -121,7 +121,7 @@ public final class JpaQueryLookupStrategy {
 
 		private final QueryMethodEvaluationContextProvider evaluationContextProvider;
 
-		//modificado entityManager
+		//Changed for entityManager issue
 		/**
 		 * Creates a new {@link DeclaredQueryLookupStrategy}.
 		 *
@@ -167,7 +167,7 @@ public final class JpaQueryLookupStrategy {
 			throw new IllegalStateException(
 					String.format("Did neither find a NamedQuery nor an annotated query for method %s!", method));
 		}
-		//fin modificado entityManager
+		//end Changed for entityManager issue
 	}
 
 	/**
@@ -183,7 +183,7 @@ public final class JpaQueryLookupStrategy {
 		private final DeclaredQueryLookupStrategy lookupStrategy;
 		private final CreateQueryLookupStrategy createStrategy;
 
-		//modificado entityManager
+		//Changed for entityManager issue
 		/**
 		 * Creates a new {@link CreateIfNotFoundQueryLookupStrategy}.
 		 *
@@ -215,10 +215,10 @@ public final class JpaQueryLookupStrategy {
 				return createStrategy.resolveQuery(method, em, emCreation, namedQueries);
 			}
 		}
-		//fin modificado entityManager
+		//end Changed for entityManager issue
 	}
 	
-	//modificado entitymanager
+	//Changed for entityManager issue
 	/**
 	 * Creates a {@link QueryLookupStrategy} for the given {@link EntityManager} and {@link Key}.
 	 *
@@ -250,5 +250,5 @@ public final class JpaQueryLookupStrategy {
 				throw new IllegalArgumentException(String.format("Unsupported query lookup strategy %s!", key));
 		}
 	}
-	//fin modificado entityManager
+	//end Changed for entityManager issue
 }

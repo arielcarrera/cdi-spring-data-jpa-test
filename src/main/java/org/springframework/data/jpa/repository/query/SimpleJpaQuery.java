@@ -32,7 +32,7 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
  * @author Mark Paluch
  */
 final class SimpleJpaQuery extends AbstractStringBasedJpaQuery {
-//modificado entityManager
+//Changed for entityManager issue
 	/**
 	 * Creates a new {@link SimpleJpaQuery} that encapsulates a simple query string.
 	 *
@@ -55,7 +55,7 @@ final class SimpleJpaQuery extends AbstractStringBasedJpaQuery {
 					String.format("Count query validation failed for method %s!", method));
 		}
 	}
-//fin modificado entityManager
+//End Changed for entityManager issue
 	/**
 	 * Validates the given query for syntactical correctness.
 	 *
@@ -71,9 +71,9 @@ final class SimpleJpaQuery extends AbstractStringBasedJpaQuery {
 		EntityManager validatingEm = null;
 
 		try {
-		    //modificado entityManager
+		    //Changed for entityManager issue
 			validatingEm = getEntityManagerCreation().getEntityManagerFactory().createEntityManager();
-		    //fin modificado entityManager
+		    //end Changed for entityManager issue
 			validatingEm.createQuery(query);
 
 		} catch (RuntimeException e) {
