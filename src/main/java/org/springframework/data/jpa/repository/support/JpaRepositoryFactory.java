@@ -86,16 +86,17 @@ public class JpaRepositoryFactory extends RepositoryFactorySupport {
 		this.entityManager = entityManager;
 		//modificado entitymanager
 		this.entityManagerCreation = entityManager;
+		this.extractor = PersistenceProvider.fromEntityManager(entityManagerCreation);
 		
-		this.extractor = PersistenceProvider.fromEntityManager(entityManager);
 		this.crudMethodMetadataPostProcessor = new CrudMethodMetadataPostProcessor();
 		this.entityPathResolver = SimpleEntityPathResolver.INSTANCE;
 
 		addRepositoryProxyPostProcessor(crudMethodMetadataPostProcessor);
 		
 		if (extractor.equals(PersistenceProvider.ECLIPSELINK)) {
-			addQueryCreationListener(new EclipseLinkProjectionQueryCreationListener(entityManager));
+			addQueryCreationListener(new EclipseLinkProjectionQueryCreationListener(entityManagerCreation));
 		}
+		//fin modificado entitymanager
 	}
 	//agregado entitymanager
 	public JpaRepositoryFactory(EntityManager entityManager,EntityManager entityManagerCreation) {
@@ -220,8 +221,10 @@ public class JpaRepositoryFactory extends RepositoryFactorySupport {
 	@Override
 	protected Optional<QueryLookupStrategy> getQueryLookupStrategy(@Nullable Key key,
 			QueryMethodEvaluationContextProvider evaluationContextProvider) {
+	  //modificado entitymanager
 		return Optional
-				.of(JpaQueryLookupStrategy.create(entityManagerCreation, key, extractor, evaluationContextProvider, escapeCharacter));
+				.of(JpaQueryLookupStrategy.create(entityManager, entityManagerCreation, key, extractor, evaluationContextProvider, escapeCharacter));
+	  //fin modificado entitymanager
 	}
 
 	/*
@@ -231,8 +234,9 @@ public class JpaRepositoryFactory extends RepositoryFactorySupport {
 	@Override
 	@SuppressWarnings("unchecked")
 	public <T, ID> JpaEntityInformation<T, ID> getEntityInformation(Class<T> domainClass) {
-
+	  //modificado entitymanager
 		return (JpaEntityInformation<T, ID>) JpaEntityInformationSupport.getEntityInformation(domainClass, entityManagerCreation);
+	  //fin modificado entitymanager
 	}
 
 	/*

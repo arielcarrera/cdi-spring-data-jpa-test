@@ -5,22 +5,23 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.lang.reflect.UndeclaredThrowableException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.NonUniqueResultException;
+import javax.transaction.UserTransaction;
 
+import org.hibernate.LazyInitializationException;
 import org.jboss.weld.environment.se.Weld;
 import org.jboss.weld.junit4.WeldInitiator;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Rule;
@@ -38,61 +39,35 @@ import org.springframework.data.domain.Sort.Direction;
 import com.github.arielcarrera.cdi.entities.LogicalDeletion;
 import com.github.arielcarrera.cdi.exceptions.DataAccessException;
 import com.github.arielcarrera.cdi.repositories.ReadOnlyRepository;
-import com.github.arielcarrera.cdi.test.config.AgroalConnectionProvider;
 import com.github.arielcarrera.cdi.test.config.JtaEnvironment;
 import com.github.arielcarrera.cdi.test.entities.TestEntity;
 import com.github.arielcarrera.cdi.test.repositories.TestReadWriteDeleteRepository;
 
-import io.agroal.api.AgroalDataSourceMetrics;
-
+@Slf4j
 public abstract class AbstractReadOnlyRepositoryTest {
 
 	@ClassRule
 	public static JtaEnvironment jtaEnvironment = new JtaEnvironment();
+
 	@Rule
-	public WeldInitiator weld = WeldInitiator.from(new Weld()).activate(RequestScoped.class)
-				.inject(this).build();
-	
+	public WeldInitiator weld = WeldInitiator.from(new Weld()).inject(this).build();
+
 	@Rule
 	public TestRule watcher = new TestWatcher() {
-	   protected void starting(Description description) {
-	      System.out.println("Starting TEST: " + description.getMethodName());
-	      lastMethod = currentMethod;
-	      currentMethod = description.getMethodName();
-	   }
+		protected void starting(Description description) {
+			log.info("Starting TEST: " + description.getMethodName());
+		}
 	};
-	
-	private static String lastMethod = "-";
-	private static String currentMethod = "-";
-	
+
 	@Inject
 	protected EntityManager entityManager;
 
 	@Inject
 	protected TestReadWriteDeleteRepository loaderRepository;
-	
-	@Before
-	public void statusPoolBegin() {
-    	AgroalDataSourceMetrics metrics = AgroalConnectionProvider.getMetrics();
-    	if (metrics != null) {
-	    	System.out.println("Metricas del pool INICIO " + currentMethod + ":" + metrics);
-	    	if (metrics.maxUsedCount() > 1) {
-	    		System.out.println("Alerta: max=" + metrics.maxUsedCount() + " -> metodo: " + currentMethod + " -> previo: " +  lastMethod);
-	    	}
-    	}
-	}
-	
-	@After
-	public void statusPoolEnd() {
-  	AgroalDataSourceMetrics metrics = AgroalConnectionProvider.getMetrics();
-  	if (metrics != null) {
-    	System.out.println("Metricas del pool FIN " + currentMethod + ":" + metrics);
-	    if (metrics.maxUsedCount() > 1) {
-    		System.out.println("Alerta: max=" + metrics.maxUsedCount() + " -> metodo: " + currentMethod + " -> previo: " +  lastMethod);
-	  	}
-    }
-	}
-	
+
+	@Inject
+	UserTransaction tx;
+
 	public AbstractReadOnlyRepositoryTest() {
 		super();
 	}
@@ -127,13 +102,32 @@ public abstract class AbstractReadOnlyRepositoryTest {
 	public void entityManager_OK() {
 		assertNotNull(getTestRepository().entityManager());
 	}
-	
-        // el metodo insideTx se encuentra en RequestEntityManagerTest
-        @Test
-        public void entityManager_contains_outsideTx() {
-    		assertFalse(getTestRepository().contains(getTestRepository().findOneById(1)));
-        }
-	
+
+	@Test
+	public void entityManager_contains_outsideGlobalTx() {
+		assertFalse(getTestRepository().contains(getTestRepository().findById(1).get()));
+	}
+
+	@Test
+	public void entityManager_contains_insideGlobalTx_simpleJpaRepoMethod() throws Exception {
+		tx.begin();
+		try {
+			assertTrue(getTestRepository().contains(getTestRepository().findById(1).get()));
+		} finally {
+			tx.commit();
+		}
+	}
+
+	@Test
+	public void entityManager_contains_insideGlobalTx_queryGeneratedByMethodName() throws Exception {
+		tx.begin();
+		try {
+			assertTrue(getTestRepository().contains(getTestRepository().findOneById(1)));
+		} finally {
+			tx.commit();
+		}
+	}
+
 	@Test
 	public void findById_OK() {
 		Optional<TestEntity> op = getTestRepository().findById(1);
@@ -147,6 +141,19 @@ public abstract class AbstractReadOnlyRepositoryTest {
 		Optional<TestEntity> op = getTestRepository().findById(-1);
 		assertNotNull(op);
 		assertFalse(op.isPresent());
+	}
+
+	@Test
+	public void findOneById_OK() {
+		TestEntity e = getTestRepository().findOneById(1);
+		assertNotNull(e);
+		assertTrue(e.getValue().equals(101));
+	}
+
+	@Test
+	public void findOneById_NotFound() {
+		TestEntity e = getTestRepository().findOneById(-1);
+		assertNull(e);
 	}
 
 	@Test
@@ -222,33 +229,51 @@ public abstract class AbstractReadOnlyRepositoryTest {
 		assertTrue(c == 20);
 	}
 
-	@Test
-	public void getOne_OK() {
-		//this method must to be called inside a transaction or it will cause a Connection leak because connection.Close() is never called  
-		entityManager.getTransaction().begin();
+	@Test(expected = LazyInitializationException.class)
+	public void getOne_NoTx() {
 		TestEntity p = getTestRepository().getOne(1);
 		assertNotNull(p);
-		assertTrue(p.getValue().equals(101));
-		entityManager.getTransaction().commit();
+		p.getValue();
 	}
-	
-	@Test(expected=EntityNotFoundException.class)
-	public void getOne_NotFound() {
+
+	@Test
+	public void getOne_InTx() throws Exception {
+		tx.begin();
 		try {
-			//this method must to be called inside a transaction or it will cause a Connection leak because connection.Close() is never called  
-			entityManager.getTransaction().begin();
+			TestEntity p = getTestRepository().getOne(1);
+			assertNotNull(p);
+			assertTrue(p.getValue().equals(101));
+		} finally {
+			tx.commit();
+		}
+	}
+
+	@Test(expected = LazyInitializationException.class)
+	public void getOne_OutTx() throws Exception {
+		tx.begin();
+		TestEntity p;
+		try {
+			p = getTestRepository().getOne(1);
+			assertNotNull(p);
+		} finally {
+			tx.commit();
+		}
+		assertNotNull(p);
+		p.getValue();
+	}
+
+	@Test(expected = EntityNotFoundException.class)
+	public void getOne_NotFound() throws Exception {
+		tx.begin();
+		try {
 			TestEntity p = getTestRepository().getOne(-1);
 			if (p != null) {
-				assertNull(p.getValue()); //hibernate must throw an EntityNotFoundException
+				assertNull(p.getValue());
 			} else {
 				assertNull(p);
 			}
-			entityManager.getTransaction().commit();
-		} catch(Exception e) {
-			if (entityManager.getTransaction().isActive()) {
-				entityManager.getTransaction().rollback();
-			}
-			throw e;
+		} finally {
+			tx.commit();
 		}
 	}
 

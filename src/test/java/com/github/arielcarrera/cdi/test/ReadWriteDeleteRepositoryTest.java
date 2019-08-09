@@ -35,9 +35,8 @@ public class ReadWriteDeleteRepositoryTest extends AbstractReadWriteRepositoryTe
 	@Test
 	public void deleteById_OK() {
 		getTestRepository().deleteById(1);
-		getEntityManager().clear();
 
-		assertFalse(getTestRepository().existsById(1));
+		assertFalse(TestJdbcUtil.jdbcExistById(1));
 	}
 
 	@Test(expected = DataAccessException.class)
@@ -65,25 +64,22 @@ public class ReadWriteDeleteRepositoryTest extends AbstractReadWriteRepositoryTe
 	@Test
 	public void delete_attached_entity_OK() {
 		getTestRepository().delete(getTestRepository().getOne(1));
-		getEntityManager().clear();
 		
-		assertFalse(getTestRepository().existsById(1));
+		assertFalse(TestJdbcUtil.jdbcExistById(1));
 	}
 
 	@Test
 	public void delete_detached_entity_OK() {
 		getTestRepository().delete(new TestEntity(1, null));
-		getEntityManager().clear();
 		
-		assertFalse(getTestRepository().existsById(1));
+		assertFalse(TestJdbcUtil.jdbcExistById(1));
 	}
 
 	@Test
 	public void delete_detached_entity_updated_OK() {
 		getTestRepository().delete(new TestEntity(1, 1));
-		getEntityManager().clear();
 		
-		assertFalse(getTestRepository().existsById(1));
+		assertFalse(TestJdbcUtil.jdbcExistById(1));
 	}
 
 	/**
@@ -95,8 +91,7 @@ public class ReadWriteDeleteRepositoryTest extends AbstractReadWriteRepositoryTe
 	@Test
 	public void delete_detached_entity_NotFound() {
 		getTestRepository().delete(new TestEntity(100, null));
-		getEntityManager().clear();
-		assertFalse(getTestRepository().existsById(100));
+		assertFalse(TestJdbcUtil.jdbcExistById(100));
 	}
 
 	@Test(expected = DataAccessException.class)
@@ -117,12 +112,11 @@ public class ReadWriteDeleteRepositoryTest extends AbstractReadWriteRepositoryTe
 			entities.add(new TestEntity(i, i + 100, i + 100));
 		}
 		getTestRepository().deleteAll(entities);
-		getEntityManager().clear();
 
-		assertFalse(getTestRepository().existsById(1));
-		assertFalse(getTestRepository().existsById(2));
-		assertFalse(getTestRepository().existsById(3));
-		assertTrue(getTestRepository().existsById(4));
+		assertFalse(TestJdbcUtil.jdbcExistById(1));
+		assertFalse(TestJdbcUtil.jdbcExistById(2));
+		assertFalse(TestJdbcUtil.jdbcExistById(3));
+		assertTrue(TestJdbcUtil.jdbcExistById(4));
 	}
 
 	@Test
@@ -132,12 +126,11 @@ public class ReadWriteDeleteRepositoryTest extends AbstractReadWriteRepositoryTe
 			entities.add(new TestEntity(i, i + 1000, null));
 		}
 		getTestRepository().deleteAll(entities);
-		getEntityManager().clear();
 
-		assertFalse(getTestRepository().existsById(1));
-		assertFalse(getTestRepository().existsById(2));
-		assertFalse(getTestRepository().existsById(3));
-		assertTrue(getTestRepository().existsById(4));
+		assertFalse(TestJdbcUtil.jdbcExistById(1));
+		assertFalse(TestJdbcUtil.jdbcExistById(2));
+		assertFalse(TestJdbcUtil.jdbcExistById(3));
+		assertTrue(TestJdbcUtil.jdbcExistById(4));
 	}
 
 	@Test
@@ -147,12 +140,11 @@ public class ReadWriteDeleteRepositoryTest extends AbstractReadWriteRepositoryTe
 			entities.add(getTestRepository().getOne(i));
 		}
 		getTestRepository().deleteAll(entities);
-		getEntityManager().clear();
 		
-		assertFalse(getTestRepository().existsById(1));
-		assertFalse(getTestRepository().existsById(2));
-		assertFalse(getTestRepository().existsById(3));
-		assertTrue(getTestRepository().existsById(4));
+		assertFalse(TestJdbcUtil.jdbcExistById(1));
+		assertFalse(TestJdbcUtil.jdbcExistById(2));
+		assertFalse(TestJdbcUtil.jdbcExistById(3));
+		assertTrue(TestJdbcUtil.jdbcExistById(4));
 	}
 
 	@Test
@@ -160,9 +152,8 @@ public class ReadWriteDeleteRepositoryTest extends AbstractReadWriteRepositoryTe
 		List<TestEntity> entities = new ArrayList<>();
 		entities.add(new TestEntity(100, null));
 		getTestRepository().deleteAll(entities);
-		getEntityManager().clear();
 		
-		assertFalse(getTestRepository().existsById(100));
+		assertFalse(TestJdbcUtil.jdbcExistById(100));
 	}
 
 	@Test(expected = DataAccessException.class)
@@ -178,25 +169,22 @@ public class ReadWriteDeleteRepositoryTest extends AbstractReadWriteRepositoryTe
 	@Test
 	public void deleteAll_iterable_Empty() {
 		getTestRepository().deleteAll(new ArrayList<TestEntity>());
-		getEntityManager().clear();
 		
-		assertTrue(getTestRepository().count() == 20);
+		assertTrue(TestJdbcUtil.jdbcCountAll() == 20);
 	}
 
 	@Test
 	public void deleteAll_OK() {
 		getTestRepository().deleteAll();
-		getEntityManager().clear();
 		
-		assertTrue(getTestRepository().count() == 0);
+		assertTrue(TestJdbcUtil.jdbcCountAll() == 0);
 	}
 
 	@Test
 	public void flush_delete_OK() {
 		getTestRepository().deleteById(1);
-		getEntityManager().clear();
 
-		assertFalse(getTestRepository().existsById(1));
+		assertFalse(TestJdbcUtil.jdbcExistById(1));
 	}
 
 	@Test
@@ -206,11 +194,10 @@ public class ReadWriteDeleteRepositoryTest extends AbstractReadWriteRepositoryTe
 			entities.add(new TestEntity(i, i + 100, i + 100));
 		}
 		getTestRepository().deleteInBatch(entities);
-		getEntityManager().clear();
 
-		assertFalse(getTestRepository().existsById(1));
-		assertFalse(getTestRepository().existsById(2));
-		assertTrue(getTestRepository().existsById(3));
+		assertFalse(TestJdbcUtil.jdbcExistById(1));
+		assertFalse(TestJdbcUtil.jdbcExistById(2));
+		assertTrue(TestJdbcUtil.jdbcExistById(3));
 	}
 
 	@Test
@@ -218,9 +205,8 @@ public class ReadWriteDeleteRepositoryTest extends AbstractReadWriteRepositoryTe
 		List<TestEntity> entities = new ArrayList<>();
 		entities.add(new TestEntity(100, null));
 		getTestRepository().deleteInBatch(entities);
-		getEntityManager().clear();
 		
-		assertFalse(getTestRepository().existsById(100));
+		assertFalse(TestJdbcUtil.jdbcExistById(100));
 	}
 
 	@Test(expected = DataAccessException.class)
@@ -236,17 +222,15 @@ public class ReadWriteDeleteRepositoryTest extends AbstractReadWriteRepositoryTe
 	@Test
 	public void deleteInBatch_Empty() {
 		getTestRepository().deleteInBatch(new ArrayList<TestEntity>());
-		getEntityManager().clear();
 		
-		assertTrue(getTestRepository().count() == 20);
+		assertTrue(TestJdbcUtil.jdbcCountAll() == 20);
 	}
 
 	@Test
 	public void deleteAllInBatch_OK() {
 		getTestRepository().deleteAllInBatch();
-		getEntityManager().clear();
 		
-		assertTrue(getTestRepository().count() == 0);
+		assertTrue(TestJdbcUtil.jdbcCountAll() == 0);
 	}
 
 }

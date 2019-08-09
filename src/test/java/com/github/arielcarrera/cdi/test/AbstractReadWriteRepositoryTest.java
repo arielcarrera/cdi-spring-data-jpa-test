@@ -7,7 +7,9 @@ import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+
+import javax.inject.Inject;
+import javax.transaction.UserTransaction;
 
 import org.hibernate.exception.ConstraintViolationException;
 import org.junit.Test;
@@ -22,18 +24,20 @@ public abstract class AbstractReadWriteRepositoryTest extends AbstractReadOnlyRe
 		super();
 	}
 
+	@Inject
+	UserTransaction tx;
+
 	@Override
 	public abstract ReadWriteRepository<TestEntity, Integer> getTestRepository();
 
 	@Test
 	public void save_new_OK() {
 		TestEntity result = getTestRepository().save(new TestEntity(21, 121));
-		getEntityManager().clear();
 		assertNotNull(result);
 		assertTrue(result.getId().equals(21));
-		
-		assertTrue(getTestRepository().findAll().size() == 21);
-		TestEntity e = getTestRepository().getOne(21);
+
+		assertTrue(TestJdbcUtil.jdbcCountAll() == 21);
+		TestEntity e = TestJdbcUtil.jdbcGetById(21);
 		assertNotNull(e);
 		assertTrue(e.getId().equals(21));
 		assertTrue(e.getValue().equals(121));
@@ -42,12 +46,12 @@ public abstract class AbstractReadWriteRepositoryTest extends AbstractReadOnlyRe
 	@Test
 	public void save_update_OK() {
 		TestEntity result = getTestRepository().save(new TestEntity(1, 121));
-		getEntityManager().clear();
+
 		assertNotNull(result);
 		assertTrue(result.getId().equals(1));
-		
-		assertTrue(getTestRepository().findAll().size() == 20);
-		TestEntity e = getTestRepository().getOne(1);
+
+		assertTrue(TestJdbcUtil.jdbcCountAll() == 20);
+		TestEntity e = TestJdbcUtil.jdbcGetById(1);
 		assertNotNull(e);
 		assertTrue(e.getId().equals(1));
 		assertTrue(e.getValue().equals(121));
@@ -58,7 +62,7 @@ public abstract class AbstractReadWriteRepositoryTest extends AbstractReadOnlyRe
 		try {
 			getTestRepository().save(new TestEntity(21, 121, 101));
 			fail("Exception must to be raised due to non unique constraint violation");
-		} catch(DataAccessException e) {
+		} catch (DataAccessException e) {
 			assertTrue(e.getCause().getCause() instanceof ConstraintViolationException);
 			throw e;
 		}
@@ -69,7 +73,7 @@ public abstract class AbstractReadWriteRepositoryTest extends AbstractReadOnlyRe
 		try {
 			getTestRepository().save(new TestEntity(2, 102, 101));
 			fail("Exception must to be raised due to non unique constraint violation");
-		} catch(DataAccessException e) {
+		} catch (DataAccessException e) {
 			assertTrue(e.getCause().getCause() instanceof ConstraintViolationException);
 			throw e;
 		}
@@ -82,8 +86,7 @@ public abstract class AbstractReadWriteRepositoryTest extends AbstractReadOnlyRe
 			entities.add(new TestEntity(i, i + 100, i + 100));
 		}
 		Iterable<TestEntity> result = getLoaderRepository().saveAll(entities);
-		getEntityManager().clear();
-		
+
 		assertNotNull(result);
 		int count = 0;
 		boolean has21 = false, has22 = false, has23 = false;
@@ -103,10 +106,8 @@ public abstract class AbstractReadWriteRepositoryTest extends AbstractReadOnlyRe
 		}
 		assertTrue(count == 3);
 		assertTrue(has21 && has22 && has23);
-		
-		List<TestEntity> l = getTestRepository().findAll();
-		assertNotNull(l);
-		assertTrue(l.size() == 23);
+
+		assertTrue(TestJdbcUtil.jdbcCountAll() == 23);
 	}
 
 	@Test
@@ -138,20 +139,18 @@ public abstract class AbstractReadWriteRepositoryTest extends AbstractReadOnlyRe
 		}
 		assertTrue(count == 3);
 		assertTrue(has1 && has2 && has3);
-		
-		List<TestEntity> l = getTestRepository().findAll();
-		assertNotNull(l);
-		assertTrue(l.size() == 20);
-		
-		Optional<TestEntity> e = getTestRepository().findById(1);
-		assertTrue(e.isPresent());
-		assertTrue(e.get().getValue().equals(201));
-		e = getTestRepository().findById(2);
-		assertTrue(e.isPresent());
-		assertTrue(e.get().getValue().equals(202));
-		e = getTestRepository().findById(3);
-		assertTrue(e.isPresent());
-		assertTrue(e.get().getValue().equals(203));
+
+		assertTrue(TestJdbcUtil.jdbcCountAll() == 20);
+
+		TestEntity e = TestJdbcUtil.jdbcGetById(1);
+		assertNotNull(e);
+		assertTrue(e.getValue().equals(201));
+		e = TestJdbcUtil.jdbcGetById(2);
+		assertNotNull(e);
+		assertTrue(e.getValue().equals(202));
+		e = TestJdbcUtil.jdbcGetById(3);
+		assertNotNull(e);
+		assertTrue(e.getValue().equals(203));
 	}
 
 	@Test(expected = DataAccessException.class)
@@ -164,44 +163,44 @@ public abstract class AbstractReadWriteRepositoryTest extends AbstractReadOnlyRe
 		try {
 			getTestRepository().saveAll(entities);
 			fail("Exception must to be raised due to non unique constraint violation");
-		} catch(DataAccessException e) {
-			getEntityManager().clear();
+		} catch (DataAccessException e) {
 			assertTrue(e.getCause().getCause() instanceof ConstraintViolationException);
-			assertFalse(getTestRepository().existsById(21));
-			assertFalse(getTestRepository().existsById(22));
-			assertFalse(getTestRepository().existsById(23));
+			assertFalse(TestJdbcUtil.jdbcExistById(21));
+			assertFalse(TestJdbcUtil.jdbcExistById(22));
+			assertFalse(TestJdbcUtil.jdbcExistById(23));
 			throw e;
-		} 
+		}
 	}
 
 	@Test
 	public void saveAndFlush_OK() {
 		TestEntity result = getTestRepository().saveAndFlush(new TestEntity(21, 121));
-		getEntityManager().clear();
-		
+
 		assertNotNull(result);
 		assertTrue(result.getId().equals(21));
-		
-		assertTrue(getTestRepository().findAll().size() == 21);
-		Optional<TestEntity> e = getTestRepository().findById(21);
-		assertTrue(e.isPresent());
-		assertTrue(e.get().getId().equals(21));
-		assertTrue(e.get().getValue().equals(121));
+
+		assertTrue(TestJdbcUtil.jdbcCountAll() == 21);
+		TestEntity e = TestJdbcUtil.jdbcGetById(21);
+		assertNotNull(e);
+		assertTrue(e.getId().equals(21));
+		assertTrue(e.getValue().equals(121));
 	}
 
 	@Test
-	public void flush_OK() {
-		getEntityManager().getTransaction().begin();
-		getTestRepository().save(new TestEntity(21, 121));
+	public void flush_OK() throws Exception {
+		tx.begin();
+		TestEntity result = getTestRepository().save(new TestEntity(21, 121));
 		getTestRepository().flush();
-		getEntityManager().getTransaction().commit();
-		getEntityManager().clear();
-		
-		Optional<TestEntity> e = getTestRepository().findById(21);
-		assertTrue(e.isPresent());
-		assertTrue(e.get().getId().equals(21));
-		assertTrue(e.get().getValue().equals(121));
-		assertTrue(getTestRepository().findAll().size() == 21);
+		tx.commit();
+
+		assertNotNull(result);
+		assertTrue(result.getId().equals(21));
+
+		assertTrue(TestJdbcUtil.jdbcCountAll() == 21);
+		TestEntity e = TestJdbcUtil.jdbcGetById(21);
+		assertNotNull(e);
+		assertTrue(e.getId().equals(21));
+		assertTrue(e.getValue().equals(121));
 	}
 
 }

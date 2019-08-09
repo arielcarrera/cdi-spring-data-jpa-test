@@ -4,8 +4,8 @@ import org.junit.runners.Suite;
 
 @RunWith(Suite.class)				
 @Suite.SuiteClasses({
-	DefaultTransactionAnnotationTest.class,
-	RequestEntityManagerTest.class,
+    	TransactionalScopedEntityManagerTest.class,
+	TransactionalTest.class,
 	ReadOnlyRepositoryTest.class,
 	ReadOnlySoftDeleteRepositoryTest.class,
 	ReadWriteDeleteRepositoryTest.class,

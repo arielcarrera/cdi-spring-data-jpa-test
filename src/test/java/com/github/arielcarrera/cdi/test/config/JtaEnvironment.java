@@ -3,23 +3,37 @@ package com.github.arielcarrera.cdi.test.config;
 import org.jnp.server.NamingBeanImpl;
 import org.junit.rules.ExternalResource;
 
+import com.arjuna.ats.arjuna.common.ObjectStoreEnvironmentBean;
 import com.arjuna.ats.jta.utils.JNDIManager;
+import com.arjuna.common.internal.util.propertyservice.BeanPopulator;
 
 public class JtaEnvironment extends ExternalResource {
 
-    private NamingBeanImpl NAMING_BEAN;
+	private NamingBeanImpl NAMING_BEAN;
 
-    @Override
-    protected void before() throws Throwable {
-        NAMING_BEAN = new NamingBeanImpl();
-        NAMING_BEAN.start();
+	@Override
+	protected void before() throws Throwable {
+		NAMING_BEAN = new NamingBeanImpl();
+		NAMING_BEAN.start();
 
-        JNDIManager.bindJTAImplementation();
-        
-    }
+		JNDIManager.bindJTAImplementation();
 
-    @Override
-    protected void after() {
-        NAMING_BEAN.stop();
-    }
+		// Bind datasource
+		TransactionalConnectionProvider.bindDataSource();
+		// Set transaction log location
+		setObjectStoreDir();
+	}
+
+	@Override
+	protected void after() {
+		NAMING_BEAN.stop();
+	}
+
+	public static void setObjectStoreDir() {
+		BeanPopulator.getDefaultInstance(ObjectStoreEnvironmentBean.class).setObjectStoreDir("target/tx-object-store");
+		BeanPopulator.getNamedInstance(ObjectStoreEnvironmentBean.class, "communicationStore")
+				.setObjectStoreDir("target/tx-object-store");
+		BeanPopulator.getNamedInstance(ObjectStoreEnvironmentBean.class, "stateStore")
+				.setObjectStoreDir("target/tx-object-store");
+	}
 }

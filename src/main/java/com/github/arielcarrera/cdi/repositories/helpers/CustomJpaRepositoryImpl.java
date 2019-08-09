@@ -9,7 +9,6 @@ import javax.persistence.EntityManager;
  * @author Ariel Carrera
  *
  * @param <T> Type of the entity
- * @param <ID> Entity's PK
  */
 public class CustomJpaRepositoryImpl implements CustomJpaRepository {
 

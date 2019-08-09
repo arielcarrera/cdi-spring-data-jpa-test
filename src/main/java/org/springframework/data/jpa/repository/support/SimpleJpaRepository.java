@@ -84,42 +84,35 @@ public class SimpleJpaRepository<T, ID> implements JpaRepositoryImplementation<T
 	private @Nullable CrudMethodMetadata metadata;
 	private EscapeCharacter escapeCharacter = EscapeCharacter.DEFAULT;
 
+	//modificado entityManager
 	/**
 	 * Creates a new {@link SimpleJpaRepository} to manage objects of the given {@link JpaEntityInformation}.
 	 *
 	 * @param entityInformation must not be {@literal null}.
 	 * @param entityManager must not be {@literal null}.
+	 * @param entityManagerCreation if is null uses entityManager
 	 */
-	public SimpleJpaRepository(JpaEntityInformation<T, ?> entityInformation, EntityManager entityManager) {
+	public SimpleJpaRepository(JpaEntityInformation<T, ?> entityInformation, EntityManager entityManager, EntityManager entityManagerCreation) {
 
 		Assert.notNull(entityInformation, "JpaEntityInformation must not be null!");
 		Assert.notNull(entityManager, "EntityManager must not be null!");
 
 		this.entityInformation = entityInformation;
 		this.em = entityManager;
-		this.provider = PersistenceProvider.fromEntityManager(entityManager);
+		this.provider = PersistenceProvider.fromEntityManager((entityManagerCreation != null ? entityManagerCreation : entityManager));
 	}
-	//Agregado para agregar entityManager de configuracion
-	public SimpleJpaRepository(JpaEntityInformation<T, ?> entityInformation, EntityManager entityManager, EntityManager entityManagerConfiguration) {
-
-		Assert.notNull(entityInformation, "JpaEntityInformation must not be null!");
-		Assert.notNull(entityManager, "EntityManager must not be null!");
-
-		this.entityInformation = entityInformation;
-		this.em = entityManager;
-		this.provider = PersistenceProvider.fromEntityManager(entityManagerConfiguration);
-	}
-
+	
 	/**
 	 * Creates a new {@link SimpleJpaRepository} to manage objects of the given domain type.
 	 *
 	 * @param domainClass must not be {@literal null}.
 	 * @param em must not be {@literal null}.
+	 * @param emCreation if is null uses em
 	 */
-	public SimpleJpaRepository(Class<T> domainClass, EntityManager em) {
-		this(JpaEntityInformationSupport.getEntityInformation(domainClass, em), em);
+	public SimpleJpaRepository(Class<T> domainClass, EntityManager em, EntityManager emCreation) {
+		this(JpaEntityInformationSupport.getEntityInformation(domainClass, (emCreation != null ? emCreation : em)), em, emCreation);
 	}
-
+	//fin modificado entityManager
 	/**
 	 * Configures a custom {@link CrudMethodMetadata} to be used to detect {@link LockModeType}s and query hints to be
 	 * applied to queries.

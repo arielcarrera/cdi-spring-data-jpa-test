@@ -16,7 +16,7 @@ import javax.inject.Qualifier;
 @Target({ElementType.METHOD, ElementType.FIELD, ElementType.PARAMETER, ElementType.TYPE})
 public @interface RepositoryCreation {
 	
-	   public static final class Literal extends AnnotationLiteral<Any> implements Any {
+	public static final class Literal extends AnnotationLiteral<RepositoryCreation> implements RepositoryCreation {
 
 	        public static final Literal INSTANCE = new Literal();
 

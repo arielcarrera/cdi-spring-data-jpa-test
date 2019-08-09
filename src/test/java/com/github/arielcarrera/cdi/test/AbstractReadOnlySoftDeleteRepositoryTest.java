@@ -38,7 +38,8 @@ public abstract class AbstractReadOnlySoftDeleteRepositoryTest extends AbstractR
 
 	@Test
 	public void findByStatus_pageable_OK() {
-		Page<TestEntity> p = getTestRepository().findByStatus(LogicalDeletion.NORMAL_STATUS, PageRequest.of(1, 5, Sort.by(Direction.DESC, "id")));
+		Page<TestEntity> p = getTestRepository().findByStatus(LogicalDeletion.NORMAL_STATUS,
+				PageRequest.of(1, 5, Sort.by(Direction.DESC, "id")));
 		assertNotNull(p);
 		assertTrue(p.getNumberOfElements() == 5);
 		assertTrue(p.getNumber() == 1);
@@ -57,14 +58,16 @@ public abstract class AbstractReadOnlySoftDeleteRepositoryTest extends AbstractR
 
 	@Test
 	public void findByStatusIn_OK() {
-		List<TestEntity> l = getTestRepository().findByStatusIn(Arrays.asList(LogicalDeletion.NORMAL_STATUS, LogicalDeletion.DELETED_STATUS));
+		List<TestEntity> l = getTestRepository()
+				.findByStatusIn(Arrays.asList(LogicalDeletion.NORMAL_STATUS, LogicalDeletion.DELETED_STATUS));
 		assertNotNull(l);
 		assertTrue(l.size() == 20);
 	}
 
 	@Test
 	public void findByStatusIn_NoResult() {
-		List<TestEntity> l = getTestRepository().findByStatusIn(Arrays.asList(LogicalDeletion.DRAFT_STATUS, 3333, 4444));
+		List<TestEntity> l = getTestRepository()
+				.findByStatusIn(Arrays.asList(LogicalDeletion.DRAFT_STATUS, 3333, 4444));
 		assertNotNull(l);
 		assertTrue(l.isEmpty());
 	}
@@ -78,7 +81,9 @@ public abstract class AbstractReadOnlySoftDeleteRepositoryTest extends AbstractR
 
 	@Test
 	public void findByStatusIn_pageable_OK() {
-		Page<TestEntity> p = getTestRepository().findByStatusIn(Arrays.asList(LogicalDeletion.NORMAL_STATUS, LogicalDeletion.DELETED_STATUS), PageRequest.of(1, 5, Sort.by(Direction.DESC, "id")));
+		Page<TestEntity> p = getTestRepository().findByStatusIn(
+				Arrays.asList(LogicalDeletion.NORMAL_STATUS, LogicalDeletion.DELETED_STATUS),
+				PageRequest.of(1, 5, Sort.by(Direction.DESC, "id")));
 		assertNotNull(p);
 		assertTrue(p.getNumberOfElements() == 5);
 		assertTrue(p.getNumber() == 1);
@@ -89,7 +94,8 @@ public abstract class AbstractReadOnlySoftDeleteRepositoryTest extends AbstractR
 
 	@Test
 	public void findByStatusIn_pageable_PageNotFound() {
-		Page<TestEntity> p = getTestRepository().findByStatusIn(Arrays.asList(LogicalDeletion.NORMAL_STATUS, LogicalDeletion.DELETED_STATUS), PageRequest.of(10, 5));
+		Page<TestEntity> p = getTestRepository().findByStatusIn(
+				Arrays.asList(LogicalDeletion.NORMAL_STATUS, LogicalDeletion.DELETED_STATUS), PageRequest.of(10, 5));
 		assertNotNull(p);
 		assertTrue(p.getNumberOfElements() == 0);
 		assertTrue(p.getTotalPages() == 4);
@@ -97,7 +103,8 @@ public abstract class AbstractReadOnlySoftDeleteRepositoryTest extends AbstractR
 
 	@Test
 	public void findByStatusIn_pageable_NoResult() {
-		Page<TestEntity> p = getTestRepository().findByStatusIn(Arrays.asList(LogicalDeletion.DRAFT_STATUS, 3333, 4444), PageRequest.of(1, 10));
+		Page<TestEntity> p = getTestRepository().findByStatusIn(Arrays.asList(LogicalDeletion.DRAFT_STATUS, 3333, 4444),
+				PageRequest.of(1, 10));
 		assertNotNull(p);
 		assertTrue(p.getNumberOfElements() == 0);
 	}
@@ -119,7 +126,6 @@ public abstract class AbstractReadOnlySoftDeleteRepositoryTest extends AbstractR
 	@Test
 	public void findByStatusNot_NoResult() {
 		getLoaderRepository().deleteById(20);
-		getEntityManager().clear();
 		List<TestEntity> l = getTestRepository().findByStatusNot(LogicalDeletion.NORMAL_STATUS);
 		assertNotNull(l);
 		assertTrue(l.isEmpty());
@@ -127,7 +133,8 @@ public abstract class AbstractReadOnlySoftDeleteRepositoryTest extends AbstractR
 
 	@Test
 	public void findByStatusNot_pageable_OK() {
-		Page<TestEntity> p = getTestRepository().findByStatusNot(LogicalDeletion.DELETED_STATUS, PageRequest.of(1, 5, Sort.by(Direction.DESC, "id")));
+		Page<TestEntity> p = getTestRepository().findByStatusNot(LogicalDeletion.DELETED_STATUS,
+				PageRequest.of(1, 5, Sort.by(Direction.DESC, "id")));
 		assertNotNull(p);
 		assertTrue(p.getNumberOfElements() == 5);
 		assertTrue(p.getNumber() == 1);
@@ -146,29 +153,33 @@ public abstract class AbstractReadOnlySoftDeleteRepositoryTest extends AbstractR
 
 	@Test
 	public void findByStatusNotIn_OK() {
-		List<TestEntity> l = getTestRepository().findByStatusNotIn(Arrays.asList(LogicalDeletion.DRAFT_STATUS, LogicalDeletion.DELETED_STATUS));
+		List<TestEntity> l = getTestRepository()
+				.findByStatusNotIn(Arrays.asList(LogicalDeletion.DRAFT_STATUS, LogicalDeletion.DELETED_STATUS));
 		assertNotNull(l);
 		assertTrue(l.size() == 19);
 	}
 
 	@Test
 	public void findByStatusNotIn_NoResult() {
-		List<TestEntity> l = getTestRepository().findByStatusNotIn(Arrays.asList(LogicalDeletion.NORMAL_STATUS, LogicalDeletion.DELETED_STATUS, 4444));
+		List<TestEntity> l = getTestRepository()
+				.findByStatusNotIn(Arrays.asList(LogicalDeletion.NORMAL_STATUS, LogicalDeletion.DELETED_STATUS, 4444));
 		assertNotNull(l);
 		assertTrue(l.isEmpty());
 	}
 
-	//TODO improve findByStatus not in clause for empty collections
+	// TODO improve findByStatus not in clause for empty collections
 	@Test
 	public void findByStatusNotIn_Empty() {
 		List<TestEntity> l = getTestRepository().findByStatusNotIn(Collections.emptyList());
 		assertNotNull(l);
-		assertTrue(l.size() == 0); //because it has zero pages.
+		assertTrue(l.size() == 0); // because it has zero pages.
 	}
 
 	@Test
 	public void findByStatusNotIn_pageable_OK() {
-		Page<TestEntity> p = getTestRepository().findByStatusNotIn(Arrays.asList(LogicalDeletion.DRAFT_STATUS, LogicalDeletion.DELETED_STATUS), PageRequest.of(1, 5, Sort.by(Direction.DESC, "id")));
+		Page<TestEntity> p = getTestRepository().findByStatusNotIn(
+				Arrays.asList(LogicalDeletion.DRAFT_STATUS, LogicalDeletion.DELETED_STATUS),
+				PageRequest.of(1, 5, Sort.by(Direction.DESC, "id")));
 		assertNotNull(p);
 		assertTrue(p.getNumberOfElements() == 5);
 		assertTrue(p.getNumber() == 1);
@@ -179,7 +190,8 @@ public abstract class AbstractReadOnlySoftDeleteRepositoryTest extends AbstractR
 
 	@Test
 	public void findByStatusNotIn_pageable_PageNotFound() {
-		Page<TestEntity> p = getTestRepository().findByStatusNotIn(Arrays.asList(LogicalDeletion.NORMAL_STATUS, LogicalDeletion.DRAFT_STATUS), PageRequest.of(2, 5));
+		Page<TestEntity> p = getTestRepository().findByStatusNotIn(
+				Arrays.asList(LogicalDeletion.NORMAL_STATUS, LogicalDeletion.DRAFT_STATUS), PageRequest.of(2, 5));
 		assertNotNull(p);
 		assertTrue(p.getNumberOfElements() == 0);
 		assertTrue(p.getTotalPages() == 1);
@@ -187,17 +199,19 @@ public abstract class AbstractReadOnlySoftDeleteRepositoryTest extends AbstractR
 
 	@Test
 	public void findByStatusNotIn_pageable_NoResult() {
-		Page<TestEntity> p = getTestRepository().findByStatusNotIn(Arrays.asList(LogicalDeletion.NORMAL_STATUS, LogicalDeletion.DELETED_STATUS, 4444), PageRequest.of(1, 10));
+		Page<TestEntity> p = getTestRepository().findByStatusNotIn(
+				Arrays.asList(LogicalDeletion.NORMAL_STATUS, LogicalDeletion.DELETED_STATUS, 4444),
+				PageRequest.of(1, 10));
 		assertNotNull(p);
 		assertTrue(p.getNumberOfElements() == 0);
 	}
 
-	//TODO improve findByStatus not in clause for empty collections
+	// TODO improve findByStatus not in clause for empty collections
 	@Test
 	public void findByStatusNotIn_pageable_Empty() {
 		Page<TestEntity> p = getTestRepository().findByStatusNotIn(Collections.emptyList(), PageRequest.of(0, 10));
 		assertNotNull(p);
-		assertTrue(p.getNumberOfElements() == 0); //because it has zero pages.
+		assertTrue(p.getNumberOfElements() == 0); // because it has zero pages.
 		assertTrue(p.getNumber() == 0);
 		assertTrue(p.getTotalElements() == 0);
 		assertTrue(p.getTotalPages() == 0);
@@ -211,7 +225,8 @@ public abstract class AbstractReadOnlySoftDeleteRepositoryTest extends AbstractR
 
 	@Test
 	public void countByStatusIn_OK() {
-		long c = getTestRepository().countByStatusIn(Arrays.asList(LogicalDeletion.NORMAL_STATUS, LogicalDeletion.DELETED_STATUS));
+		long c = getTestRepository()
+				.countByStatusIn(Arrays.asList(LogicalDeletion.NORMAL_STATUS, LogicalDeletion.DELETED_STATUS));
 		assertTrue(c == 20);
 	}
 
@@ -236,7 +251,8 @@ public abstract class AbstractReadOnlySoftDeleteRepositoryTest extends AbstractR
 
 	@Test
 	public void findAllStatusActive_pageable_OK() {
-		Page<TestEntity> p = getTestRepository().findAllStatusActive(PageRequest.of(1, 5, Sort.by(Direction.DESC, "id")));
+		Page<TestEntity> p = getTestRepository()
+				.findAllStatusActive(PageRequest.of(1, 5, Sort.by(Direction.DESC, "id")));
 		assertNotNull(p);
 		assertTrue(p.getNumberOfElements() == 5);
 		assertTrue(p.getNumber() == 1);
@@ -247,7 +263,8 @@ public abstract class AbstractReadOnlySoftDeleteRepositoryTest extends AbstractR
 
 	@Test
 	public void findAllStatusActive_pageable_PageNotFound() {
-		Page<TestEntity> p = getTestRepository().findAllStatusActive(PageRequest.of(10, 10, Sort.by(Direction.DESC, "id")));
+		Page<TestEntity> p = getTestRepository()
+				.findAllStatusActive(PageRequest.of(10, 10, Sort.by(Direction.DESC, "id")));
 		assertNotNull(p);
 		assertTrue(p.getNumberOfElements() == 0);
 		assertTrue(p.getTotalElements() == 19);
@@ -263,7 +280,8 @@ public abstract class AbstractReadOnlySoftDeleteRepositoryTest extends AbstractR
 
 	@Test
 	public void findAllStatusNotDeleted_pageable_OK() {
-		Page<TestEntity> p = getTestRepository().findAllStatusNotDeleted(PageRequest.of(1, 5, Sort.by(Direction.DESC, "id")));
+		Page<TestEntity> p = getTestRepository()
+				.findAllStatusNotDeleted(PageRequest.of(1, 5, Sort.by(Direction.DESC, "id")));
 		assertNotNull(p);
 		assertTrue(p.getNumberOfElements() == 5);
 		assertTrue(p.getNumber() == 1);
@@ -274,7 +292,8 @@ public abstract class AbstractReadOnlySoftDeleteRepositoryTest extends AbstractR
 
 	@Test
 	public void findAllStatusNotDeleted_pageable_PageNotFound() {
-		Page<TestEntity> p = getTestRepository().findAllStatusNotDeleted(PageRequest.of(10, 10, Sort.by(Direction.DESC, "id")));
+		Page<TestEntity> p = getTestRepository()
+				.findAllStatusNotDeleted(PageRequest.of(10, 10, Sort.by(Direction.DESC, "id")));
 		assertNotNull(p);
 		assertTrue(p.getNumberOfElements() == 0);
 		assertTrue(p.getTotalElements() == 19);
@@ -284,12 +303,11 @@ public abstract class AbstractReadOnlySoftDeleteRepositoryTest extends AbstractR
 	@Test
 	public void findAllStatusDrafted_OK() {
 		getLoaderRepository().save(new TestEntity(21, 121, null, LogicalDeletion.DRAFT_STATUS));
-		getEntityManager().clear();
-		
+
 		List<TestEntity> l = getTestRepository().findAllStatusDrafted();
 		assertNotNull(l);
 		assertTrue(l.size() == 1);
-		
+
 	}
 
 	@Test
@@ -300,9 +318,9 @@ public abstract class AbstractReadOnlySoftDeleteRepositoryTest extends AbstractR
 				new TestEntity(24, 124, null, LogicalDeletion.DRAFT_STATUS),
 				new TestEntity(25, 125, null, LogicalDeletion.DRAFT_STATUS),
 				new TestEntity(26, 126, null, LogicalDeletion.DRAFT_STATUS)));
-		getEntityManager().clear();
-		
-		Page<TestEntity> p = getTestRepository().findAllStatusDrafted(PageRequest.of(1, 3, Sort.by(Direction.DESC, "id")));
+
+		Page<TestEntity> p = getTestRepository()
+				.findAllStatusDrafted(PageRequest.of(1, 3, Sort.by(Direction.DESC, "id")));
 		assertNotNull(p);
 		assertTrue(p.getNumberOfElements() == 3);
 		assertTrue(p.getNumber() == 1);
@@ -314,9 +332,9 @@ public abstract class AbstractReadOnlySoftDeleteRepositoryTest extends AbstractR
 	@Test
 	public void findAllStatusDrafted_pageable_PageNotFound() {
 		getLoaderRepository().save(new TestEntity(21, 121, null, LogicalDeletion.DRAFT_STATUS));
-		getEntityManager().clear();
-		
-		Page<TestEntity> p = getTestRepository().findAllStatusDrafted(PageRequest.of(1, 10, Sort.by(Direction.DESC, "id")));
+
+		Page<TestEntity> p = getTestRepository()
+				.findAllStatusDrafted(PageRequest.of(1, 10, Sort.by(Direction.DESC, "id")));
 		assertNotNull(p);
 		assertTrue(p.getNumberOfElements() == 0);
 		assertTrue(p.getTotalPages() == 1);
@@ -331,7 +349,8 @@ public abstract class AbstractReadOnlySoftDeleteRepositoryTest extends AbstractR
 
 	@Test
 	public void findAllStatusDeleted_pageable_OK() {
-		Page<TestEntity> p = getTestRepository().findAllStatusDeleted(PageRequest.of(0, 5, Sort.by(Direction.DESC, "id")));
+		Page<TestEntity> p = getTestRepository()
+				.findAllStatusDeleted(PageRequest.of(0, 5, Sort.by(Direction.DESC, "id")));
 		assertNotNull(p);
 		assertTrue(p.getNumberOfElements() == 1);
 		assertTrue(p.getNumber() == 0);
@@ -342,7 +361,8 @@ public abstract class AbstractReadOnlySoftDeleteRepositoryTest extends AbstractR
 
 	@Test
 	public void findAllStatusDeleted_pageable_PageNotFound() {
-		Page<TestEntity> p = getTestRepository().findAllStatusDeleted(PageRequest.of(10, 10, Sort.by(Direction.DESC, "id")));
+		Page<TestEntity> p = getTestRepository()
+				.findAllStatusDeleted(PageRequest.of(10, 10, Sort.by(Direction.DESC, "id")));
 		assertNotNull(p);
 		assertTrue(p.getNumberOfElements() == 0);
 		assertTrue(p.getTotalElements() == 1);

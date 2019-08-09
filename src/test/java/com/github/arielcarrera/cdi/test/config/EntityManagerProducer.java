@@ -2,12 +2,12 @@ package com.github.arielcarrera.cdi.test.config;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
-import javax.enterprise.context.RequestScoped;
 import javax.enterprise.inject.Disposes;
 import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.transaction.TransactionScoped;
 
 import org.springframework.data.RepositoryCreation;
 
@@ -23,7 +23,7 @@ public class EntityManagerProducer {
     private EntityManagerFactory emf;
 
     @Produces
-    @RequestScoped
+    @TransactionScoped
     public EntityManager produceEntityManager() {
         return emf.createEntityManager();
     }
