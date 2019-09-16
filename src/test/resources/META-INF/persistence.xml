@@ -30,7 +30,14 @@
             <property name="hibernate.max_fetch_depth" value="5"/>
 
             <property name="hibernate.cache.region_prefix" value="hibernate.test"/>
-
+            <!-- Use Infinispan second level cache provider -->
+			<property name="hibernate.cache.region.factory_class"
+			          value="org.hibernate.cache.infinispan.InfinispanRegionFactory"/>
+			<!-- Optional: Force using local configuration when only using a single node.
+			     Otherwise a clustered configuration is loaded. -->
+			<property name="hibernate.cache.infinispan.cfg"
+			          value="org/hibernate/cache/infinispan/builder/infinispan-configs-local.xml"/>
+			          
             <property name="javax.persistence.validation.mode" value="NONE"/>
             <property name="hibernate.service.allow_crawling" value="false"/>
             <property name="hibernate.session.events.log" value="false"/>
