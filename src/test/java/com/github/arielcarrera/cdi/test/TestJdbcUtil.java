@@ -98,6 +98,25 @@ public class TestJdbcUtil {
 	return -1;
     }
 
+    public static TestEntity jdbcPut(TestEntity entity) {
+	try {
+	    JdbcDataSource dataSource = TransactionalConnectionProvider.getDataSource();
+	    try (Connection connection = dataSource.getConnection()) {
+		try (PreparedStatement statement = connection.prepareStatement(
+			"INSERT INTO `TestEntity` (`id`,`value`,`uniqueValue`,`status`) VALUES (?,?,?,?)")) {
+		    statement.setInt(1, entity.getId());
+		    statement.setInt(2, entity.getValue());
+		    statement.setInt(3, entity.getUniqueValue());
+		    statement.setInt(4, entity.getStatus());
+		    statement.executeUpdate();
+		}
+	    }
+	} catch (Exception e) {
+	    fail("Invalid Test JDBC Configuration");
+	}
+	return null;
+    }
+    
     public static TestEntity jdbcPutCacheable(CacheableEntity entity) {
 	try {
 	    JdbcDataSource dataSource = TransactionalConnectionProvider.getDataSource();

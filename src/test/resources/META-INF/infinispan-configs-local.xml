@@ -20,7 +20,7 @@
       <!-- Default configuration is appropriate for entity/collection caching. -->
       <local-cache-configuration name="entity" statistics="false" statistics-available="false">
          <custom-interceptors>
-         	<interceptor position="FIRST" class="com.github.arielcarrera.cdi.test.config.HibernateCacheInterceptor"/>
+         	<interceptor position="FIRST" class="com.github.arielcarrera.cdi.test.config.TestInfinispanCacheInterceptor"/>
          </custom-interceptors>
          <transaction mode="NONE" />
          <expiration max-idle="100000" interval="5000"/>
@@ -32,7 +32,7 @@
       <!-- A config appropriate for query caching. Does not replicate queries. -->
       <local-cache-configuration name="local-query" statistics="false" statistics-available="false">
          <custom-interceptors>
-         	<interceptor position="FIRST" class="com.github.arielcarrera.cdi.test.config.HibernateCacheInterceptor"/>
+         	<interceptor position="FIRST" class="com.github.arielcarrera.cdi.test.config.TestInfinispanCacheInterceptor"/>
          </custom-interceptors>
          <transaction mode="NONE"/>
          <expiration max-idle="100000" interval="5000"/>

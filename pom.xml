@@ -85,12 +85,17 @@
 		    <artifactId>hibernate-infinispan</artifactId>
 		    <version>${version.org.hibernate}</version>
 		</dependency>
+		<!-- or infinispan-cdi-remote -->
 		<dependency>
 		    <groupId>org.infinispan</groupId>
 		    <artifactId>infinispan-cdi-embedded</artifactId>
 		    <version>9.3.0.Final</version>
 		</dependency>
-
+		<dependency>
+		  <groupId>org.infinispan</groupId>
+		  <artifactId>infinispan-jcache</artifactId>
+		  <version>9.3.0.Final</version>
+		</dependency>
 		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>

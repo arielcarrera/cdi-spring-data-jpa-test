@@ -35,6 +35,7 @@
             <!-- Use Infinispan second level cache provider -->
 			<property name="hibernate.cache.region.factory_class"
 			          value="org.infinispan.hibernate.cache.v53.InfinispanRegionFactory"/>
+			          
 			<!-- Optional: Force using local configuration when only using a single node.
 			     Otherwise a clustered configuration is loaded. -->
 			<!-- <property name="hibernate.cache.infinispan.cfg"

@@ -2,6 +2,7 @@ package com.github.arielcarrera.cdi.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import lombok.extern.slf4j.Slf4j;
@@ -27,9 +28,10 @@ import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.github.arielcarrera.cdi.entities.LogicalDeletion;
-import com.github.arielcarrera.cdi.test.config.HibernateCacheInterceptor;
 import com.github.arielcarrera.cdi.test.config.JtaEnvironment;
+import com.github.arielcarrera.cdi.test.config.TestInfinispanCacheInterceptor;
 import com.github.arielcarrera.cdi.test.entities.CacheableEntity;
+import com.github.arielcarrera.cdi.test.entities.TestEntity;
 import com.github.arielcarrera.cdi.test.services.CacheableTestService;
 
 /**
@@ -63,15 +65,20 @@ public class CacheableTest {
 
     @Before
     public void load() {
-	HibernateCacheInterceptor.clearHistory();
+	TestInfinispanCacheInterceptor.clearHistory();
 
 	List<CacheableEntity> list = new ArrayList<>();
 	for (int i = 1; i < 11; i++) {
 	    list.add(new CacheableEntity(i, i + 100, i + 100, LogicalDeletion.NORMAL_STATUS));
 	}
 	service.saveAll(list);
+	// adding more CacheableEntity (without caching them)
 	TestJdbcUtil.jdbcPutCacheable(new CacheableEntity(11, 111, 111, LogicalDeletion.NORMAL_STATUS));
 	TestJdbcUtil.jdbcPutCacheable(new CacheableEntity(12, 112, 112, LogicalDeletion.NORMAL_STATUS));
+
+	// adding more TestEntity (without caching them)
+	TestJdbcUtil.jdbcPut(new TestEntity(1, 111, 111, LogicalDeletion.NORMAL_STATUS));
+	TestJdbcUtil.jdbcPut(new TestEntity(2, 112, 112, LogicalDeletion.NORMAL_STATUS));
     }
 
     @Test
@@ -80,7 +87,7 @@ public class CacheableTest {
 	    Optional<CacheableEntity> optional = service.findById(1);
 	    assertTrue(optional.isPresent());
 	} finally {
-	    List<String> history = HibernateCacheInterceptor.getHistory();
+	    List<String> history = TestInfinispanCacheInterceptor.getHistory();
 	    assertFalse(history.isEmpty());
 	    assertFalse(
 		    history.stream().filter(s -> s.trim().equals("GET:" + CacheableEntity.class.getName() + "#1=FALSE"))
@@ -100,18 +107,18 @@ public class CacheableTest {
 	    Optional<CacheableEntity> optional = service.findById(11);
 	    assertTrue(optional.isPresent());
 	} finally {
-	    List<String> history = HibernateCacheInterceptor.getHistory();
+	    List<String> history = TestInfinispanCacheInterceptor.getHistory();
 	    assertTrue(history.size() > 2);
 	    List<String> inicio = history.subList(0, history.size() - 2);
 	    List<String> fin = history.subList(history.size() - 2, history.size());
-	    //Check Not loaded previously
+	    // Check Not loaded previously
 	    assertTrue(
 		    inicio.stream().filter(s -> s.trim().equals("GET:" + CacheableEntity.class.getName() + "#11=FALSE"))
 			    .collect(Collectors.toList()).isEmpty());
 	    assertTrue(
 		    inicio.stream().filter(s -> s.trim().equals("PUT:" + CacheableEntity.class.getName() + "#11=FALSE"))
 			    .collect(Collectors.toList()).isEmpty());
-	    //Check 
+	    // Check
 	    assertFalse(
 		    fin.stream().filter(s -> s.trim().equals("GET:" + CacheableEntity.class.getName() + "#11=FALSE"))
 			    .collect(Collectors.toList()).isEmpty());
@@ -127,7 +134,7 @@ public class CacheableTest {
 	    Optional<CacheableEntity> optional = service.findById(100);
 	    assertFalse(optional.isPresent());
 	} finally {
-	    List<String> history = HibernateCacheInterceptor.getHistory();
+	    List<String> history = TestInfinispanCacheInterceptor.getHistory();
 	    assertFalse(history.isEmpty());
 	    assertFalse(history.stream()
 		    .filter(s -> s.trim().equals("GET:" + CacheableEntity.class.getName() + "#100=FALSE"))
@@ -147,16 +154,16 @@ public class CacheableTest {
 	    List<CacheableEntity> findAllByValue = service.findAllByValue(110);
 	    assertEquals(findAllByValue.size(), 1);
 	} finally {
-	    List<String> history = HibernateCacheInterceptor.getHistory();
+	    List<String> history = TestInfinispanCacheInterceptor.getHistory();
 	    assertFalse(history.isEmpty());
-	    
-	    //Check that after that, entity is refreshed/added in cache
-	    assertFalse(
-		    history.stream().filter(s -> s.trim().equals("GET:" + CacheableEntity.class.getName() + "#10=FALSE"))
-			    .collect(Collectors.toList()).isEmpty());
-	    assertFalse(
-		    history.stream().filter(s -> s.trim().equals("PUT:" + CacheableEntity.class.getName() + "#10=FALSE"))
-			    .collect(Collectors.toList()).isEmpty());
+
+	    // Check that after that, entity is refreshed/added in cache
+	    assertFalse(history.stream()
+		    .filter(s -> s.trim().equals("GET:" + CacheableEntity.class.getName() + "#10=FALSE"))
+		    .collect(Collectors.toList()).isEmpty());
+	    assertFalse(history.stream()
+		    .filter(s -> s.trim().equals("PUT:" + CacheableEntity.class.getName() + "#10=FALSE"))
+		    .collect(Collectors.toList()).isEmpty());
 	    assertTrue(
 		    history.stream().filter(s -> s.trim().equals("GET:" + CacheableEntity.class.getName() + "#10=TRUE"))
 			    .collect(Collectors.toList()).isEmpty());
@@ -165,51 +172,35 @@ public class CacheableTest {
 			    .collect(Collectors.toList()).isEmpty());
 	}
     }
-    
+
     @Test
     public void findAllByValue_queryNotById_cachedService() {
 	try {
-	    List<CacheableEntity> findAllByValue = service.cachedServiceFindAllByValue(110);
-	    assertEquals(findAllByValue.size(), 1);
+	    TestEntity entity = service.cachedServiceFindTestEntityByValue(111);
+	    assertNotNull(entity);
 	} finally {
-	    List<String> history = HibernateCacheInterceptor.getHistory();
+	    List<String> history = TestInfinispanCacheInterceptor.getHistory();
 	    assertFalse(history.isEmpty());
-	    
-	    //Check that after that, entity is refreshed/added in cache
-	    assertFalse(
-		    history.stream().filter(s -> s.trim().equals("GET:" + CacheableEntity.class.getName() + "#10=FALSE"))
-			    .collect(Collectors.toList()).isEmpty());
-	    assertFalse(
-		    history.stream().filter(s -> s.trim().equals("PUT:" + CacheableEntity.class.getName() + "#10=FALSE"))
-			    .collect(Collectors.toList()).isEmpty());
-	    assertTrue(
-		    history.stream().filter(s -> s.trim().equals("GET:" + CacheableEntity.class.getName() + "#10=TRUE"))
-			    .collect(Collectors.toList()).isEmpty());
-	    assertFalse(
-		    history.stream().filter(s -> s.trim().equals("PUT:" + CacheableEntity.class.getName() + "#10=TRUE"))
-			    .collect(Collectors.toList()).isEmpty());
+
+	    // Check that after that, result is cached at service layer
+	    assertTrue(history.stream().filter(s -> s.trim().equals("GET:" + TestEntity.class.getName() + "#1=FALSE"))
+		    .collect(Collectors.toList()).isEmpty());
+	    assertTrue(history.stream().filter(s -> s.trim().equals("PUT:" + TestEntity.class.getName() + "#1=FALSE"))
+		    .collect(Collectors.toList()).isEmpty());
+	    assertFalse(history.stream().filter(s -> s.trim().startsWith("READWRITEKEY:DefaultCacheKey{parameters=[111], hashCode=") && s.trim().endsWith("=FALSE"))
+		    .collect(Collectors.toList()).isEmpty());
+	    assertFalse(history.stream().filter(s -> s.trim().startsWith("READWRITEKEYVALUE:DefaultCacheKey{parameters=[111], hashCode=") && s.trim().endsWith("=FALSE"))
+		    .collect(Collectors.toList()).isEmpty());
 	}
-	HibernateCacheInterceptor.clearHistory();
+	TestInfinispanCacheInterceptor.clearHistory();
 	try {
-	    List<CacheableEntity> findAllByValue = service.cachedServiceFindAllByValue(110);
-	    assertEquals(findAllByValue.size(), 1);
+	    TestEntity entity = service.cachedServiceFindTestEntityByValue(111);
+	    assertNotNull(entity);
 	} finally {
-	    List<String> history = HibernateCacheInterceptor.getHistory();
-	    assertFalse(history.isEmpty());
+	    List<String> history = TestInfinispanCacheInterceptor.getHistory();
+	    assertEquals(history.size(), 1);
 	    
-	    //Check that after that, entity is refreshed/added in cache
-	    assertFalse(
-		    history.stream().filter(s -> s.trim().equals("GET:" + CacheableEntity.class.getName() + "#10=FALSE"))
-			    .collect(Collectors.toList()).isEmpty());
-	    assertFalse(
-		    history.stream().filter(s -> s.trim().equals("PUT:" + CacheableEntity.class.getName() + "#10=FALSE"))
-			    .collect(Collectors.toList()).isEmpty());
-	    assertTrue(
-		    history.stream().filter(s -> s.trim().equals("GET:" + CacheableEntity.class.getName() + "#10=TRUE"))
-			    .collect(Collectors.toList()).isEmpty());
-	    assertFalse(
-		    history.stream().filter(s -> s.trim().equals("PUT:" + CacheableEntity.class.getName() + "#10=TRUE"))
-			    .collect(Collectors.toList()).isEmpty());
+	    assertTrue(history.get(0).trim().startsWith("READWRITEKEY:DefaultCacheKey{parameters=[111], hashCode=") && history.get(0).trim().endsWith("=TRUE"));
 	}
     }
 
