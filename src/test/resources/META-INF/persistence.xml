@@ -15,7 +15,7 @@
         <jta-data-source>java:/testDS</jta-data-source>
 
         <exclude-unlisted-classes>false</exclude-unlisted-classes>
-
+		<shared-cache-mode>ENABLE_SELECTIVE</shared-cache-mode>
         <properties>
             <property name="hibernate.archive.autodetection" value="class, hbm"/>
 
@@ -28,9 +28,23 @@
             <property name="hibernate.hbm2ddl.auto" value="create-drop"/>
 
             <property name="hibernate.max_fetch_depth" value="5"/>
-
+			
+			<property name="hibernate.generate_statistics" value="true" />
+			<property name="hibernate.cache.use_second_level_cache" value="true"/>
+			<property name="hibernate.cache.use_query_cache" value="true"/>
+			
             <property name="hibernate.cache.region_prefix" value="hibernate.test"/>
-
+            <!-- Use Infinispan second level cache provider -->
+			<property name="hibernate.cache.region.factory_class"
+			          value="org.infinispan.hibernate.cache.v53.InfinispanRegionFactory"/>
+			          
+			<!-- Optional: Force using local configuration when only using a single node.
+			     Otherwise a clustered configuration is loaded. -->
+			<!-- <property name="hibernate.cache.infinispan.cfg"
+			          value="org/infinispan/hibernate/cache/commons/builder/infinispan-configs-local.xml"/> -->
+			<property name="hibernate.cache.infinispan.cfg"
+			          value="META-INF/infinispan-configs-local.xml"/> 
+			          
             <property name="javax.persistence.validation.mode" value="NONE"/>
             <property name="hibernate.service.allow_crawling" value="false"/>
             <property name="hibernate.session.events.log" value="false"/>

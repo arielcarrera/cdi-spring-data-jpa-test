@@ -10,7 +10,8 @@ import org.junit.runners.Suite;
 	ReadOnlySoftDeleteRepositoryTest.class,
 	ReadWriteDeleteRepositoryTest.class,
 	ReadWriteRepositoryTest.class,
-	ReadWriteSoftDeleteRepositoryTest.class
+	ReadWriteSoftDeleteRepositoryTest.class,
+	CacheTest.class
 })		
 public class TestSuite {				
 			// This class remains empty, it is used only as a holder for the above annotations		
