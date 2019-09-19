@@ -14,7 +14,7 @@ import com.github.arielcarrera.cdi.test.entities.CacheableEntity;
 
 @Named
 @ApplicationScoped
-public class ServiceCacheManager {
+public class TestCustomCacheManager {
 
    @Inject
    private Cache<CacheKey, CacheableEntity> cache;

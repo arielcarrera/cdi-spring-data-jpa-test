@@ -8,6 +8,8 @@ import org.infinispan.configuration.cache.Configuration;
 import org.infinispan.configuration.cache.ConfigurationBuilder;
 import org.infinispan.configuration.cache.InterceptorConfiguration.Position;
 
+import com.github.arielcarrera.cdi.test.cache.TestInfinispanCacheInterceptor;
+
 /**
  * Service Cache producer
  * 
@@ -15,7 +17,7 @@ import org.infinispan.configuration.cache.InterceptorConfiguration.Position;
  *
  */
 @ApplicationScoped
-public class ServiceCacheProducer {
+public class CacheConfigProducer {
 
     /**
      * <p>
@@ -29,7 +31,7 @@ public class ServiceCacheProducer {
      * </p>
      */
     @ConfigureCache("service-cache")
-    @ServiceCache
+    @CustomCache
     @Produces
     public Configuration serviceCacheConfiguration() {
 	return new ConfigurationBuilder().simpleCache(false).customInterceptors().addInterceptor()

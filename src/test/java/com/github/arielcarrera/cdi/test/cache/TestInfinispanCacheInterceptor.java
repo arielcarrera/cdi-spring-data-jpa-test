@@ -1,4 +1,4 @@
-package com.github.arielcarrera.cdi.test.config;
+package com.github.arielcarrera.cdi.test.cache;
 
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -6,7 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.hibernate.cache.spi.entry.CacheEntry;
 import org.infinispan.commands.VisitableCommand;
 import org.infinispan.commands.functional.ReadOnlyKeyCommand;
 import org.infinispan.commands.functional.ReadOnlyManyCommand;
@@ -21,6 +20,9 @@ import org.infinispan.commands.functional.WriteOnlyManyEntriesCommand;
 import org.infinispan.commands.read.GetAllCommand;
 import org.infinispan.commands.read.GetCacheEntryCommand;
 import org.infinispan.commands.read.GetKeyValueCommand;
+import org.infinispan.commands.write.ClearCommand;
+import org.infinispan.commands.write.EvictCommand;
+import org.infinispan.commands.write.InvalidateCommand;
 import org.infinispan.commands.write.PutKeyValueCommand;
 import org.infinispan.commands.write.RemoveCommand;
 import org.infinispan.commands.write.ReplaceCommand;
@@ -49,9 +51,7 @@ public class TestInfinispanCacheInterceptor extends BaseCustomAsyncInterceptor {
 
     @Override
     public Object visitPutKeyValueCommand(InvocationContext ctx, PutKeyValueCommand command) throws Throwable {
-	log.info("Procesing Interceptor PUT (Cache Infinispan) - key: " + command.getKey() + " - clase: "
-		+ ((CacheEntry) command.getValue()).getSubclass() + " - valor serializado: "
-		+ ((CacheEntry) command.getValue()).getDisassembledState());
+	log.info("Procesing Interceptor PUT (Cache Infinispan) - key: " + command.getKey());
 	Object invokeNext = super.invokeNext(ctx, command);
 	history.add("PUT:" + command.getKey().toString() + "=" + (invokeNext == null ? "FALSE" : "TRUE"));
 	return invokeNext;
@@ -191,6 +191,30 @@ public class TestInfinispanCacheInterceptor extends BaseCustomAsyncInterceptor {
 	log.info("Procesing Interceptor VISIT REPLACE (Cache Infinispan) - key: " + command.getKey().toString());
 	Object visit = super.visitReplaceCommand(ctx, command);
 	history.add("REPLACE:" + command.getKey().toString() + "=" + (visit == null ? "FALSE" : "TRUE"));
+	return visit;
+    }
+
+    @Override
+    public Object visitClearCommand(InvocationContext ctx, ClearCommand command) throws Throwable {
+	log.info("Procesing Interceptor VISIT CLEAR (Cache Infinispan): ");
+	Object visit = super.visitClearCommand(ctx, command);
+	history.add("CLEAR");
+	return visit;
+    }
+
+    @Override
+    public Object visitEvictCommand(InvocationContext ctx, EvictCommand command) throws Throwable {
+	log.info("Procesing Interceptor VISIT EVICT (Cache Infinispan) - key: " + command.getKey().toString());
+	Object visit = super.visitEvictCommand(ctx, command);
+	history.add("EVICT:" + command.getKey().toString() + "=" + (visit == null ? "FALSE" : "TRUE"));
+	return visit;
+    }
+
+    @Override
+    public Object visitInvalidateCommand(InvocationContext ctx, InvalidateCommand command) throws Throwable {
+	log.info("Procesing Interceptor VISIT INVALIDATE (Cache Infinispan) - key: " + command.getKeys().toString());
+	Object visit = super.visitInvalidateCommand(ctx, command);
+	history.add("INVALIDATE:" + command.getKeys().toString() + "=" + (visit == null ? "FALSE" : "TRUE"));
 	return visit;
     }
 
