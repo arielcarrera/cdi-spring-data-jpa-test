@@ -7,9 +7,11 @@ import javax.cache.annotation.CacheKeyInvocationContext;
 import javax.cache.annotation.GeneratedCacheKey;
 
 public class ServiceCacheKeyGenerator implements CacheKeyGenerator {
-    @Override
-    public GeneratedCacheKey generateCacheKey(final CacheKeyInvocationContext< ? extends Annotation> cacheKeyInvocationContext) {
-	return new ServiceCacheGeneratedKey(cacheKeyInvocationContext.getMethod(), cacheKeyInvocationContext.getAllParameters());
-    }
-    
+	@Override
+	public GeneratedCacheKey generateCacheKey(
+			final CacheKeyInvocationContext<? extends Annotation> cacheKeyInvocationContext) {
+		return new ServiceCacheGeneratedKey(cacheKeyInvocationContext.getMethod(),
+				cacheKeyInvocationContext.getAllParameters());
+	}
+
 }

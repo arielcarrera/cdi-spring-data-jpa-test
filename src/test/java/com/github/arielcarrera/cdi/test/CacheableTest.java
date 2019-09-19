@@ -187,9 +187,9 @@ public class CacheableTest {
 		    .collect(Collectors.toList()).isEmpty());
 	    assertTrue(history.stream().filter(s -> s.trim().equals("PUT:" + TestEntity.class.getName() + "#1=FALSE"))
 		    .collect(Collectors.toList()).isEmpty());
-	    assertFalse(history.stream().filter(s -> s.trim().startsWith("READWRITEKEY:DefaultCacheKey{parameters=[111], hashCode=") && s.trim().endsWith("=FALSE"))
+	    assertFalse(history.stream().filter(s -> s.trim().startsWith("READWRITEKEY:ServiceCacheGeneratedKey(key=com.github.arielcarrera.cdi.test.services.CacheableTestService.cachedServiceFindTestEntityByValue(java.lang.Integer)#[111], hashCode=") && s.trim().endsWith("=FALSE"))
 		    .collect(Collectors.toList()).isEmpty());
-	    assertFalse(history.stream().filter(s -> s.trim().startsWith("READWRITEKEYVALUE:DefaultCacheKey{parameters=[111], hashCode=") && s.trim().endsWith("=FALSE"))
+	    assertFalse(history.stream().filter(s -> s.trim().startsWith("READWRITEKEYVALUE:ServiceCacheGeneratedKey(key=com.github.arielcarrera.cdi.test.services.CacheableTestService.cachedServiceFindTestEntityByValue(java.lang.Integer)#[111], hashCode=") && s.trim().endsWith("=FALSE"))
 		    .collect(Collectors.toList()).isEmpty());
 	}
 	TestInfinispanCacheInterceptor.clearHistory();
@@ -200,7 +200,7 @@ public class CacheableTest {
 	    List<String> history = TestInfinispanCacheInterceptor.getHistory();
 	    assertEquals(history.size(), 1);
 	    
-	    assertTrue(history.get(0).trim().startsWith("READWRITEKEY:DefaultCacheKey{parameters=[111], hashCode=") && history.get(0).trim().endsWith("=TRUE"));
+	    assertTrue(history.get(0).trim().startsWith("READWRITEKEY:ServiceCacheGeneratedKey(key=com.github.arielcarrera.cdi.test.services.CacheableTestService.cachedServiceFindTestEntityByValue(java.lang.Integer)#[111], hashCode=") && history.get(0).trim().endsWith("=TRUE"));
 	}
     }
 

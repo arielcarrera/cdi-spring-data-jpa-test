@@ -31,6 +31,13 @@ public class ServiceCacheProducer {
     @ConfigureCache("service-cache")
     @ServiceCache
     @Produces
+    public Configuration serviceCacheConfiguration() {
+	return new ConfigurationBuilder().simpleCache(false).customInterceptors().addInterceptor()
+		.interceptor(new TestInfinispanCacheInterceptor()).position(Position.FIRST).expiration().lifespan(60000l)
+		.build();
+    }
+    
+    @Produces
     public Configuration defaultCacheConfiguration() {
 	return new ConfigurationBuilder().simpleCache(false).customInterceptors().addInterceptor()
 		.interceptor(new TestInfinispanCacheInterceptor()).position(Position.FIRST).expiration().lifespan(60000l)
